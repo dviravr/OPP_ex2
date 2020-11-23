@@ -28,7 +28,9 @@ public interface game_service extends Serializable {
     *
     * @return
     */
-   public directed_weighted_graph getJava_Graph_Not_to_be_used();
+   default directed_weighted_graph getJava_Graph_Not_to_be_used() {
+      return null;
+   }
 
    /**
     * Returns a JSON string, representing all Pokemons (fixed bonus coin).

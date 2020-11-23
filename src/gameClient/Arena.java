@@ -78,11 +78,11 @@ public class Arena {
 
    }
 
-   public List<CL_Agent> getRobots() {
+   public List<CL_Agent> getAgents() {
       return _agents;
    }
 
-   public List<CL_Pokemon> getFruits() {
+   public List<CL_Pokemon> getPokemons() {
       return _pokemons;
    }
 

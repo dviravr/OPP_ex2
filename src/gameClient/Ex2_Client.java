@@ -26,7 +26,7 @@ public class Ex2_Client implements Runnable {
    @Override
    public void run() {
       int scenario_num = 11;
-      int id = 999;
+      //int id = 999;
 
       game_service game = Game_Server_Ex2.getServer(scenario_num); // you have [0,23] games
       //game.login(id);
@@ -41,7 +41,7 @@ public class Ex2_Client implements Runnable {
       long dt = 100;
 
       while (game.isRunning()) {
-         moveRobots(game, gg);
+         moveAgents(game, gg);
          try {
             if (ind % 1 == 0) {
                _win.repaint();
@@ -66,7 +66,7 @@ public class Ex2_Client implements Runnable {
     * @param gg
     * @param
     */
-   private static void moveRobots(game_service game, directed_weighted_graph gg) {
+   private static void moveAgents(game_service game, directed_weighted_graph gg) {
       String lg = game.move();
       List<CL_Agent> log = Agent_Graph_Algo.getAgents(lg, gg);
       _ar.setAgents(log);

@@ -5,7 +5,6 @@ import Server.Game_Server_Ex2;
 import api.directed_weighted_graph;
 import api.edge_data;
 import api.game_service;
-import gameClient.util.Point3D;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,8 +14,7 @@ public class ClientThereadedGame implements Runnable {
    private static MyFrame _win;
    private static Arena _ar;
 
-   public static long LOW_SPEED_DT = 520, _speedyDT;
-   //	public static int _ind = 0;
+   public static long LOW_SPEED_DT = 200, _speedyDT;
    public static long _dt = LOW_SPEED_DT, _last, _start;
    public static boolean DYNAMIC_DT = true;
 
@@ -32,21 +30,18 @@ public class ClientThereadedGame implements Runnable {
       //	Game_Server.login(id);
       game_service game = Game_Server_Ex2.getServer(scenario_num); // you have [0,23] games
       String g = game.getGraph();
-      String fruits = game.getPokemons();
+      String pokemons = game.getPokemons();
       directed_weighted_graph gg = game.getJava_Graph_Not_to_be_used();
       _ar = new Arena();
       _ar.setGraph(gg);
       _win = new MyFrame("test Ex2");
       _win.update(_ar);
       _win.setSize(1000, 700);
-      //initKML(gg);
 
-      //	System.out.println(_kml.toKML());
       _win.show();
       String info = game.toString();
       JSONObject line;
       try {
-         // "GameServer":{"graph":"A0","fruits":3,"robots":1}}
          line = new JSONObject(info);
          JSONObject ttt = line.getJSONObject("GameServer");
          int rs = ttt.getInt("agents");
@@ -80,7 +75,7 @@ public class ClientThereadedGame implements Runnable {
       long dt = 100;
 
       while (game.isRunning()) {
-         moveRobots(game, gg);
+         moveAgents(game, gg);
          try {
             if (ind % 2 == 0) {
                _win.repaint();
@@ -98,7 +93,6 @@ public class ClientThereadedGame implements Runnable {
       //_win = null;
    }
 
-   // json2Pokemons
    private List<CL_Pokemon> getPokemons(String a) {
       return Agent_Graph_Algo.json2Pokemons(a);
    }
@@ -107,39 +101,8 @@ public class ClientThereadedGame implements Runnable {
       return Agent_Graph_Algo.getAgents(aa, _ar.getGraph());
    }
 
-   /**
-    * Moves each of the robots along the edge,
-    * in case the robot is on a node the next destination (next edge) is chosen (randomly).
-    *
-    * @param game
-    * @param gg
-    */
-   private static void moveRobots1(game_service game, directed_weighted_graph gg) {
+   private static void moveAgents(game_service game, directed_weighted_graph gg) {
       String lg = game.move();
-      List<CL_Agent> log = Agent_Graph_Algo.getAgents(lg, gg);
-      _ar.setAgents(log);
-      ArrayList<Point3D> rs = new ArrayList<Point3D>();
-      String fs = game.getPokemons();
-      ArrayList<CL_Pokemon> ffs = Agent_Graph_Algo.json2Pokemons(fs);
-      _ar.setPokemons(ffs);
-      if (log != null) {
-         long t = game.timeToEnd();
-         for (int i = 0; i < log.size(); i++) {
-            CL_Agent robot = log.get(i);
-            //_ar.updateRobots(log);
-            int dest = robot.getNextNode();
-            if (dest == -1) {
-               game.chooseNextEdge(robot.getID(), dest);
-            }
-         }
-         //testDT();
-         _ar.setPokemons(ffs);
-      }
-   }
-
-   private static void moveRobots(game_service game, directed_weighted_graph gg) {
-      String lg = game.move();
-      //	List<String> log = game.getRobots();
       String fs = game.getPokemons();
       //_ar.set_info(log);
       List<CL_Agent> log = Agent_Graph_Algo.getAgents(lg, _ar.getGraph());
@@ -150,8 +113,8 @@ public class ClientThereadedGame implements Runnable {
       long dt = LOW_SPEED_DT;
       if (log != null) {
          long t = game.timeToEnd();
-         for (int i = 0; i < _ar.getRobots().size(); i++) {
-            CL_Agent r = _ar.getRobots().get(i);
+         for (int i = 0; i < _ar.getAgents().size(); i++) {
+            CL_Agent r = _ar.getAgents().get(i);
             int src = r.getSrcNode();
             int dest = r.getNextNode();
             double speed = r.getSpeed();
