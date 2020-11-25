@@ -1,7 +1,5 @@
 package api;
-
 import java.util.List;
-
 /**
  * This interface represents a Directed (positive) Weighted Graph Theory Algorithms including:
  * 0. clone(); (copy)
@@ -13,6 +11,7 @@ import java.util.List;
  * 6. Load(file); // JSON file
  *
  * @author boaz.benmoshe
+ *
  */
 public interface dw_graph_algorithms {
    /**
