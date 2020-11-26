@@ -57,4 +57,15 @@ public class EdgeData implements edge_data {
    public void setTag(int t) {
       _tag = t;
    }
+
+   @Override
+   public String toString() {
+      return "EdgeData{" +
+              "src=" + _src +
+              ", dest=" + _dest +
+              ", tag=" + _tag +
+              ", info='" + _info +
+              ", weight=" + _weight +
+              '}';
+   }
 }

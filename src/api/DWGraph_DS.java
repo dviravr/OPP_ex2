@@ -37,7 +37,7 @@ public class DWGraph_DS implements directed_weighted_graph {
    @Override
    public void addNode(node_data n) {
 //      if the node exist don't do nothing
-      if (hasNode(n.getKey())) {
+      if (!hasNode(n.getKey())) {
          _graphNodes.put(n.getKey(), n);
          _graphEdges.put(n.getKey(), new HashMap<>());
          _destNi.put(n.getKey(), new HashSet<>());
@@ -76,13 +76,12 @@ public class DWGraph_DS implements directed_weighted_graph {
       if (node != null) {
 //         if the node exist in the graph and removing all his edges
 //         first, removing all of the edges that the node is the dest node
-         ArrayList<HashSet<Integer>> destNis = new ArrayList<>(_destNi.values());
-//         destNis have just one element - set of the sources
-         for (int ni : destNis.get(0)) {
+         for (int ni : new HashSet<>(_destNi.get(key))) {
             removeEdge(ni, key);
          }
 //         after he isn't the dest of any node removing him from the graph
          edgeSize -= _graphEdges.get(key).size();
+         _destNi.remove(key);
          _graphEdges.remove(key);
          _graphNodes.remove(key);
          modeCount++;
@@ -114,6 +113,14 @@ public class DWGraph_DS implements directed_weighted_graph {
    @Override
    public int getMC() {
       return modeCount;
+   }
+
+   @Override
+   public String toString() {
+      return "DWGraph_DS{" +
+              "graphNodes=" + _graphNodes +
+              ", graphEdges=" + _graphEdges.values() +
+              '}';
    }
 
    private boolean hasNode(int key) {

@@ -38,4 +38,13 @@ public class GeoLocation implements geo_location {
    public double distance(geo_location g) {
       return Math.sqrt(Math.pow((_x - g.x()), 2) + Math.pow((_y - g.y()), 2) + Math.pow((_z - g.z()), 2));
    }
+
+   @Override
+   public String toString() {
+      return "GeoLocation{" +
+              "x=" + _x +
+              ", y=" + _y +
+              ", z=" + _z +
+              '}';
+   }
 }

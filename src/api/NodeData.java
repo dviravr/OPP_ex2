@@ -12,7 +12,12 @@ public class NodeData implements node_data {
       _id = id;
    }
 
-   public NodeData(node_data n) {
+   NodeData(int id, GeoLocation p) {
+      this(id);
+      _location = p;
+   }
+
+   NodeData(node_data n) {
 //      copy constructor
       _id = n.getKey();
       _tag = n.getTag();
@@ -64,5 +69,16 @@ public class NodeData implements node_data {
    @Override
    public void setTag(int t) {
       _tag = t;
+   }
+
+   @Override
+   public String toString() {
+      return "NodeData{" +
+              "id=" + _id +
+              ", tag=" + _tag +
+              ", info='" + _info +
+              ", weight=" + _weight +
+              ", location=" + _location +
+              '}';
    }
 }
