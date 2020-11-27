@@ -12,11 +12,7 @@ import java.util.HashSet;
 
 public class DWGraph_DS implements directed_weighted_graph {
 
-   @Expose()
-   @SerializedName("Nodes")
    private final HashMap<Integer, node_data> _graphNodes;
-   @Expose()
-   @SerializedName("Edges")
    private final HashMap<Integer, HashMap<Integer, edge_data>> _graphEdges;
    private final HashMap<Integer, HashSet<Integer>> _destNi;
    private int modeCount = 0;
