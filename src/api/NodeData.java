@@ -3,6 +3,7 @@ package api;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class NodeData implements node_data {
 
@@ -12,16 +13,16 @@ public class NodeData implements node_data {
    private double _weight;
    private geo_location _pos;
 
-   NodeData(int id) {
+   public NodeData(int id) {
       _id = id;
    }
 
-   NodeData(int id, GeoLocation p) {
+   public NodeData(int id, GeoLocation p) {
       this(id);
       _pos = p;
    }
 
-   NodeData(node_data n) {
+   public NodeData(node_data n) {
 //      copy constructor
       _id = n.getKey();
       _tag = n.getTag();
@@ -82,6 +83,23 @@ public class NodeData implements node_data {
               ", pos=" + _pos +
               '}';
    }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      NodeData nodeData = (NodeData) o;
+      return _id == nodeData._id &&
+              _tag == nodeData._tag &&
+              Double.compare(nodeData._weight, _weight) == 0 &&
+              Objects.equals(_info, nodeData._info) &&
+              Objects.equals(_pos, nodeData._pos);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(_id, _tag, _info, _weight, _pos);
+   }
 }
 
 class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<node_data> {
@@ -95,6 +113,11 @@ class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<nod
 
    @Override
    public node_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-      return null;
+      int id = jsonElement.getAsJsonObject().get("id").getAsInt();
+      String pos = jsonElement.getAsJsonObject().get("pos").getAsString();
+      String[] location = pos.split(",");
+      GeoLocation p = new GeoLocation(Double.parseDouble(location[0]),
+              Double.parseDouble(location[1]), Double.parseDouble(location[2]));
+      return new NodeData(id, p);
    }
 }

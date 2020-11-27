@@ -3,8 +3,8 @@ package api;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
-//@JsonAdapter(EdgeDataAdapter.class)
 public class EdgeData implements edge_data {
 
    private final int _src;
@@ -19,7 +19,7 @@ public class EdgeData implements edge_data {
       _weight = weight;
    }
 
-   public EdgeData(edge_data e) {
+   EdgeData(edge_data e) {
 //      copy constructor
       _src = e.getSrc();
       _dest = e.getDest();
@@ -73,6 +73,23 @@ public class EdgeData implements edge_data {
               ", weight=" + _weight +
               '}';
    }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      EdgeData edgeData = (EdgeData) o;
+      return _src == edgeData._src &&
+              _dest == edgeData._dest &&
+              _tag == edgeData._tag &&
+              Double.compare(edgeData._weight, _weight) == 0 &&
+              Objects.equals(_info, edgeData._info);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(_src, _dest, _tag, _info, _weight);
+   }
 }
 
 class EdgeDataAdapter implements JsonSerializer<edge_data>, JsonDeserializer<edge_data> {
@@ -88,6 +105,9 @@ class EdgeDataAdapter implements JsonSerializer<edge_data>, JsonDeserializer<edg
 
    @Override
    public edge_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-      return null;
+      int src = jsonElement.getAsJsonObject().get("src").getAsInt();
+      int dest = jsonElement.getAsJsonObject().get("dest").getAsInt();
+      double w = jsonElement.getAsJsonObject().get("w").getAsDouble();
+      return new EdgeData(src, dest, w);
    }
 }

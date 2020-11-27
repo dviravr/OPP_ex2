@@ -3,10 +3,7 @@ package api;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class DWGraph_DS implements directed_weighted_graph {
 
@@ -53,7 +50,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 
    @Override
    public void connect(int src, int dest, double w) {
-      if (hasNode(src) && hasNode(dest) && w >= 0) { // todo: maybe just w > 0
+      if (hasNode(src) && hasNode(dest) && w >= 0 && src != dest) { // todo: maybe just w > 0
          if (!hasEdge(src, dest)) {
             edgeSize++;
          }
@@ -129,6 +126,21 @@ public class DWGraph_DS implements directed_weighted_graph {
               '}';
    }
 
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      DWGraph_DS that = (DWGraph_DS) o;
+      return edgeSize == that.edgeSize &&
+              Objects.equals(_graphNodes, that._graphNodes) &&
+              Objects.equals(_graphEdges, that._graphEdges);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(_graphNodes, _graphEdges, edgeSize);
+   }
+
    private boolean hasNode(int key) {
       return _graphNodes.containsKey(key);
    }
@@ -160,6 +172,19 @@ class GraphAdapter implements JsonSerializer<directed_weighted_graph>, JsonDeser
 
    @Override
    public directed_weighted_graph deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-      return null;
+      directed_weighted_graph graph = new DWGraph_DS();
+
+      JsonArray nodesArray = jsonElement.getAsJsonObject().getAsJsonArray("Nodes");
+      JsonArray edgesArray = jsonElement.getAsJsonObject().getAsJsonArray("Edges");
+      for (JsonElement na : nodesArray) {
+         graph.addNode(nodeDataAdapter.deserialize(na, type, jsonDeserializationContext));
+      }
+      for (JsonElement ea : edgesArray) {
+         int src = ea.getAsJsonObject().get("src").getAsInt();
+         int dest = ea.getAsJsonObject().get("dest").getAsInt();
+         double w = ea.getAsJsonObject().get("w").getAsDouble();
+         graph.connect(src, dest, w);
+      }
+      return graph;
    }
 }
