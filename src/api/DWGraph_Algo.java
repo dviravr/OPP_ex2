@@ -1,5 +1,10 @@
 package api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,7 +56,16 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean save(String file) {
-      return false;
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
+      Gson gson = gsonBuilder.create();
+      try (FileWriter writer = new FileWriter("./graph.json")) {
+         writer.write(gson.toJson(_graph));
+         return true;
+      } catch (IOException e) {
+         e.printStackTrace();
+         return false;
+      }
    }
 
    @Override

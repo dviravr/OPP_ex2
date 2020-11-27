@@ -41,10 +41,6 @@ public class GeoLocation implements geo_location {
 
    @Override
    public String toString() {
-      return "GeoLocation{" +
-              "x=" + _x +
-              ", y=" + _y +
-              ", z=" + _z +
-              '}';
+      return _x + "," + _y + "," + _z;
    }
 }

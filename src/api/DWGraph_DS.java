@@ -1,10 +1,22 @@
 package api;
 
-import java.util.*;
+import com.google.gson.*;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class DWGraph_DS implements directed_weighted_graph {
 
+   @Expose()
+   @SerializedName("Nodes")
    private final HashMap<Integer, node_data> _graphNodes;
+   @Expose()
+   @SerializedName("Edges")
    private final HashMap<Integer, HashMap<Integer, edge_data>> _graphEdges;
    private final HashMap<Integer, HashSet<Integer>> _destNi;
    private int modeCount = 0;
@@ -129,5 +141,31 @@ public class DWGraph_DS implements directed_weighted_graph {
 
    private boolean hasEdge(int src, int dest) {
       return hasNode(src) && _graphEdges.get(src).containsKey(dest);
+   }
+}
+
+class GraphAdapter implements JsonSerializer<directed_weighted_graph>, JsonDeserializer<directed_weighted_graph> {
+   NodeDataAdapter nodeDataAdapter = new NodeDataAdapter();
+   EdgeDataAdapter edgeDataAdapter = new EdgeDataAdapter();
+
+   @Override
+   public JsonElement serialize(directed_weighted_graph graph, Type type, JsonSerializationContext jsonSerializationContext) {
+      JsonArray edgesArray = new JsonArray();
+      JsonArray nodesArray = new JsonArray();
+      for (node_data node : graph.getV()) {
+         nodesArray.add(nodeDataAdapter.serialize(node, type, jsonSerializationContext));
+         for (edge_data edge : graph.getE(node.getKey())) {
+            edgesArray.add(edgeDataAdapter.serialize(edge, type, jsonSerializationContext));
+         }
+      }
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.add("Edges", edgesArray);
+      jsonObject.add("Nodes", nodesArray);
+      return jsonObject;
+   }
+
+   @Override
+   public directed_weighted_graph deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+      return null;
    }
 }

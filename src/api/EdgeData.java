@@ -1,5 +1,10 @@
 package api;
 
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
+
+//@JsonAdapter(EdgeDataAdapter.class)
 public class EdgeData implements edge_data {
 
    private final int _src;
@@ -67,5 +72,22 @@ public class EdgeData implements edge_data {
               ", info='" + _info +
               ", weight=" + _weight +
               '}';
+   }
+}
+
+class EdgeDataAdapter implements JsonSerializer<edge_data>, JsonDeserializer<edge_data> {
+
+   @Override
+   public JsonElement serialize(edge_data edge, Type type, JsonSerializationContext jsonSerializationContext) {
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("src", edge.getSrc());
+      jsonObject.addProperty("w", edge.getWeight());
+      jsonObject.addProperty("dest", edge.getDest());
+      return jsonObject;
+   }
+
+   @Override
+   public edge_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+      return null;
    }
 }

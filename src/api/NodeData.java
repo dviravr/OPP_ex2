@@ -1,12 +1,16 @@
 package api;
 
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
+
 public class NodeData implements node_data {
 
    private final int _id;
    private int _tag;
    private String _info;
    private double _weight;
-   private geo_location _location;
+   private geo_location _pos;
 
    NodeData(int id) {
       _id = id;
@@ -14,7 +18,7 @@ public class NodeData implements node_data {
 
    NodeData(int id, GeoLocation p) {
       this(id);
-      _location = p;
+      _pos = p;
    }
 
    NodeData(node_data n) {
@@ -23,7 +27,7 @@ public class NodeData implements node_data {
       _tag = n.getTag();
       _info = n.getInfo();
       _weight = n.getWeight();
-      _location = new GeoLocation(n.getLocation());
+      _pos = new GeoLocation(n.getLocation());
    }
 
    @Override
@@ -33,12 +37,12 @@ public class NodeData implements node_data {
 
    @Override
    public geo_location getLocation() {
-      return _location;
+      return _pos;
    }
 
    @Override
    public void setLocation(geo_location p) {
-      _location = p;
+      _pos = p;
    }
 
    @Override
@@ -73,12 +77,24 @@ public class NodeData implements node_data {
 
    @Override
    public String toString() {
-      return "NodeData{" +
+      return "{" +
               "id=" + _id +
-              ", tag=" + _tag +
-              ", info='" + _info +
-              ", weight=" + _weight +
-              ", location=" + _location +
+              ", pos=" + _pos +
               '}';
+   }
+}
+
+class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<node_data> {
+   @Override
+   public JsonElement serialize(node_data node, Type type, JsonSerializationContext jsonSerializationContext) {
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("pos", node.getLocation().toString());
+      jsonObject.addProperty("id", node.getKey());
+      return jsonObject;
+   }
+
+   @Override
+   public node_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+      return null;
    }
 }
