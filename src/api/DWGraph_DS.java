@@ -1,5 +1,8 @@
 package api;
 
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class DWGraph_DS implements directed_weighted_graph {
@@ -37,7 +40,7 @@ public class DWGraph_DS implements directed_weighted_graph {
    @Override
    public void addNode(node_data n) {
 //      if the node exist don't do nothing
-      if (hasNode(n.getKey())) {
+      if (!hasNode(n.getKey())) {
          _graphNodes.put(n.getKey(), n);
          _graphEdges.put(n.getKey(), new HashMap<>());
          _destNi.put(n.getKey(), new HashSet<>());
@@ -47,7 +50,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 
    @Override
    public void connect(int src, int dest, double w) {
-      if (hasNode(src) && hasNode(dest) && w >= 0) { // todo: maybe just w > 0
+      if (hasNode(src) && hasNode(dest) && w >= 0 && src != dest) { // todo: maybe just w > 0
          if (!hasEdge(src, dest)) {
             edgeSize++;
          }
@@ -76,13 +79,12 @@ public class DWGraph_DS implements directed_weighted_graph {
       if (node != null) {
 //         if the node exist in the graph and removing all his edges
 //         first, removing all of the edges that the node is the dest node
-         ArrayList<HashSet<Integer>> destNis = new ArrayList<>(_destNi.values());
-//         destNis have just one element - set of the sources
-         for (int ni : destNis.get(0)) {
+         for (int ni : new HashSet<>(_destNi.get(key))) {
             removeEdge(ni, key);
          }
 //         after he isn't the dest of any node removing him from the graph
          edgeSize -= _graphEdges.get(key).size();
+         _destNi.remove(key);
          _graphEdges.remove(key);
          _graphNodes.remove(key);
          modeCount++;
@@ -116,11 +118,73 @@ public class DWGraph_DS implements directed_weighted_graph {
       return modeCount;
    }
 
+   @Override
+   public String toString() {
+      return "DWGraph_DS{" +
+              "graphNodes=" + _graphNodes +
+              ", graphEdges=" + _graphEdges.values() +
+              '}';
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      DWGraph_DS that = (DWGraph_DS) o;
+      return edgeSize == that.edgeSize &&
+              Objects.equals(_graphNodes, that._graphNodes) &&
+              Objects.equals(_graphEdges, that._graphEdges);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(_graphNodes, _graphEdges, edgeSize);
+   }
+
    private boolean hasNode(int key) {
       return _graphNodes.containsKey(key);
    }
 
    private boolean hasEdge(int src, int dest) {
       return hasNode(src) && _graphEdges.get(src).containsKey(dest);
+   }
+}
+
+class GraphAdapter implements JsonSerializer<directed_weighted_graph>, JsonDeserializer<directed_weighted_graph> {
+   NodeDataAdapter nodeDataAdapter = new NodeDataAdapter();
+   EdgeDataAdapter edgeDataAdapter = new EdgeDataAdapter();
+
+   @Override
+   public JsonElement serialize(directed_weighted_graph graph, Type type, JsonSerializationContext jsonSerializationContext) {
+      JsonArray edgesArray = new JsonArray();
+      JsonArray nodesArray = new JsonArray();
+      for (node_data node : graph.getV()) {
+         nodesArray.add(nodeDataAdapter.serialize(node, type, jsonSerializationContext));
+         for (edge_data edge : graph.getE(node.getKey())) {
+            edgesArray.add(edgeDataAdapter.serialize(edge, type, jsonSerializationContext));
+         }
+      }
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.add("Edges", edgesArray);
+      jsonObject.add("Nodes", nodesArray);
+      return jsonObject;
+   }
+
+   @Override
+   public directed_weighted_graph deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+      directed_weighted_graph graph = new DWGraph_DS();
+
+      JsonArray nodesArray = jsonElement.getAsJsonObject().getAsJsonArray("Nodes");
+      JsonArray edgesArray = jsonElement.getAsJsonObject().getAsJsonArray("Edges");
+      for (JsonElement na : nodesArray) {
+         graph.addNode(nodeDataAdapter.deserialize(na, type, jsonDeserializationContext));
+      }
+      for (JsonElement ea : edgesArray) {
+         int src = ea.getAsJsonObject().get("src").getAsInt();
+         int dest = ea.getAsJsonObject().get("dest").getAsInt();
+         double w = ea.getAsJsonObject().get("w").getAsDouble();
+         graph.connect(src, dest, w);
+      }
+      return graph;
    }
 }

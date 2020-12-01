@@ -1,5 +1,11 @@
 package api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,12 +14,12 @@ public class DWGraph_Algo implements dw_graph_algorithms {
    private directed_weighted_graph _graph;
    private final HashMap<Integer, Integer> _path;
 
-   DWGraph_Algo() {
+   public DWGraph_Algo() {
       _graph = new DWGraph_DS();
       _path = new HashMap<>();
    }
 
-   DWGraph_Algo(directed_weighted_graph g) {
+   public DWGraph_Algo(directed_weighted_graph g) {
       _graph = g;
       _path = new HashMap<>();
    }
@@ -51,11 +57,29 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean save(String file) {
-      return false;
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
+      Gson gson = gsonBuilder.create();
+      try (FileWriter writer = new FileWriter("./graph.json")) {
+         writer.write(gson.toJson(_graph));
+         return true;
+      } catch (IOException e) {
+         e.printStackTrace();
+         return false;
+      }
    }
 
    @Override
    public boolean load(String file) {
-      return false;
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
+      Gson gson = gsonBuilder.create();
+      try (FileReader reader = new FileReader("./graph.json")) {
+         _graph = gson.fromJson(reader, DWGraph_DS.class);
+         return true;
+      } catch (IOException e) {
+         e.printStackTrace();
+         return false;
+      }
    }
 }
