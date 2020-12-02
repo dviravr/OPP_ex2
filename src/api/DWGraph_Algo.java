@@ -2,26 +2,26 @@ package api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class DWGraph_Algo implements dw_graph_algorithms {
+public class DWGraph_Algo implements dw_graph_algorithms{
 
    private directed_weighted_graph _graph;
    private final HashMap<Integer, Integer> _path;
    private HashMap<Integer,Algo_Node> _nodes;
-   private PriorityQueue<Algo_Node> _queue;
-   private Comparator<Algo_Node> compereNode = new CompereNode();
+
 
 
    /**
     * inner class thar represent node that will used in the algorithm.
     * the Algo_Node is Similar to the main vertex of the program. With slight modifications of addition and omissions.
     */
-   private class Algo_Node{
+   private static class Algo_Node implements Comparable<Algo_Node>{
       private int _AlgoKey;
       private  double _AlgoDist= -1;
       private boolean _isVisited = false;
@@ -53,25 +53,10 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       public void set_AlgoDist(double _AlgoDist) {
          this._AlgoDist = _AlgoDist;
       }
-   }
 
-   /**
-    * inner class of comparator it used to compre between 2 Algo_Node when you add them to the priority queue.
-    * The comparison is made according to the values of the _AlgoDist in each of the node.
-    */
-   private static class CompereNode implements Comparator<Algo_Node> {
-
-      public CompereNode(){}
       @Override
-      public int compare(Algo_Node o1, Algo_Node o2) {
-         int ans = 0;
-         double tag1 = o1.get_AlgoDist();
-         double tag2 = o2.get_AlgoDist();
-         if(tag1<0 || tag2<0)
-            throw new RuntimeException("ERR: the node can not add to the queue without change is default tag");
-         if(tag1<tag2) {ans = -1;}
-         if(tag1>tag2) {ans = 1;}
-         return ans;
+      public int compareTo(@NotNull Algo_Node o) {
+         return Double.compare(this.get_AlgoDist(),o.get_AlgoDist());
       }
    }
 
@@ -79,27 +64,25 @@ public class DWGraph_Algo implements dw_graph_algorithms {
    public DWGraph_Algo() {
       _graph = new DWGraph_DS();
       _path = new HashMap<>();
-      _nodes= new HashMap<>();
    }
 
    public DWGraph_Algo(directed_weighted_graph g) {
       _graph = g;
       _path = new HashMap<>();
-      _nodes = new HashMap<>();
-      for (node_data i: g.getV()) {
+      initNodes();
+   }
+
+   private void initNodes(){
+      _nodes.clear();
+      for (node_data i: _graph.getV()) {
          _nodes.put(i.getKey(),new Algo_Node(i));
       }
    }
-
    @Override
    public void init(directed_weighted_graph g) {
       _graph = g;
-      _queue = new PriorityQueue<Algo_Node>(compereNode);
       _nodes = new HashMap<>();
-    //  _nodes.clear();
-      for (node_data i: g.getV()) {
-         _nodes.put(i.getKey(),new Algo_Node(i));
-      }
+      initNodes();
    }
 
 
@@ -118,17 +101,21 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean isConnected() {
-      if((_graph.getV().isEmpty() ) || (_graph.getV().size() == 1))
+      if ((_graph.getV().isEmpty()) || (_graph.getV().size() == 1))
          return true;
+      initNodes();
+      int temp = _graph.getV().iterator().next().getKey();
+      int connectCount = scan(getGraph(), temp, -1);
 
-      int sumConnect , temp = _graph.getV().iterator().next().getKey();
-      /*if ((alreadyRun) && (saveStatus_MC == _graph.getMC()))
-         sumConnect = saveStatus_connectCount;
-      else*/
-      //   sumConnect = dijkstra(temp);
-      return (0 == _graph.nodeSize());
+      System.out.println(connectCount);
+      if (connectCount != getGraph().nodeSize())
+         return false;
+
+      directed_weighted_graph reverse = reverseGraph(getGraph());
+      int connectCountReverse = scan(reverse, temp, -1);
+      System.out.println(connectCountReverse);
+      return (connectCount == connectCountReverse);
    }
-
 
    @Override
    public double shortestPathDist(int src, int dest) {
@@ -136,7 +123,8 @@ public class DWGraph_Algo implements dw_graph_algorithms {
               (!_graph.getV().contains(_graph.getNode(dest)))))
          return -1;
       if (src==dest) {return 0;}
-         scan(src,dest);
+
+      scan(getGraph(),src,dest);
       return _nodes.get(dest)._AlgoDist;
    }
 
@@ -160,12 +148,33 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       for (int j = 0; j < temp ; j++) {
          shortPath.add(path.pop());
       }
+      path = null;
       return shortPath;
    }
 
-   private void scan(int start,int dest) {
+   private directed_weighted_graph reverseGraph(directed_weighted_graph g){
+      directed_weighted_graph ans = new DWGraph_DS();
+      for (node_data i: g.getV()) {
+         ans.addNode(i);
+      }
+      for (node_data j:g.getV()) {
+           for (edge_data i:g.getE(j.getKey())) {
+               ans.connect(i.getDest(),i.getSrc(),i.getWeight());
+          }
+      }
+      return ans;
+   }
+
+   private int scan(directed_weighted_graph g , int start,int dest) {
+      PriorityQueue<Algo_Node> _queue = new PriorityQueue<>(Algo_Node::compareTo);/////
+       _nodes = new HashMap<Integer, Algo_Node>();
+      initNodes();
+
+      int counter =1;
       Algo_Node node = _nodes.get(start);
+
       _nodes.get(start).set_AlgoDist(0);
+      _nodes.get(start).setVisited(true);
       _queue.add(node);
       _path.put(start, null);
 
@@ -173,9 +182,13 @@ public class DWGraph_Algo implements dw_graph_algorithms {
          node = _queue.poll();
          if(node.get_AlgoKey()==dest)
             break;
-         for (edge_data i : _graph.getE(node.get_AlgoKey())) {
+         for (edge_data i : g.getE(node.get_AlgoKey())) {
             double temp = node.get_AlgoDist() + i.getWeight();
             double currectDist = _nodes.get(i.getDest()).get_AlgoDist();
+            if(!_nodes.get(i.getDest()).isVisited()){
+               counter++;
+               _nodes.get(i.getDest()).setVisited(true);
+            }
             if ((currectDist == -1.0) || (temp < currectDist)) {
                _nodes.get(i.getDest()).set_AlgoDist(temp);
                _queue.add(_nodes.get(i.getDest()));
@@ -183,6 +196,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
             }
          }
       }
+      return counter;
    }
 
 
@@ -192,7 +206,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();
-      try (FileWriter writer = new FileWriter("./graph.json")) {
+      try (FileWriter writer = new FileWriter(file)) {
          writer.write(gson.toJson(_graph));
          return true;
       } catch (IOException e) {
@@ -206,7 +220,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();
-      try (FileReader reader = new FileReader("./graph.json")) {
+      try (FileReader reader = new FileReader(file)) {
          _graph = gson.fromJson(reader, DWGraph_DS.class);
          return true;
       } catch (IOException e) {
