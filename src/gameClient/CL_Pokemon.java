@@ -10,6 +10,7 @@ public class CL_Pokemon {
 	private final Point3D _pos;
 	private double min_dist;
 	private int min_ro;
+	private int closestAgent;
 
 	public CL_Pokemon(Point3D p, int t, double v, double s, edge_data e) {
 		_type = t;
@@ -19,6 +20,7 @@ public class CL_Pokemon {
 		_pos = p;
 		min_dist = -1;
 		min_ro = -1;
+		closestAgent = -1;
 	}
 
 	public static CL_Pokemon init_from_json(String json) {
@@ -51,6 +53,14 @@ public class CL_Pokemon {
 
 	public int getType() {
 		return _type;
+	}
+
+	public int getClosestAgent() {
+		return closestAgent;
+	}
+
+	public void setClosestAgent(int closestAgent) {
+		this.closestAgent = closestAgent;
 	}
 
 	//	public double getSpeed() {return _speed;}
