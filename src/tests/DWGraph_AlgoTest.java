@@ -27,20 +27,16 @@ class DWGraph_AlgoTest {
       ga.init(g);
       assertTrue(ga.isConnected()); // EMPTY graph shuold be connect
       g.addNode(new NodeData(0));
-      ga.init(g);
       assertTrue(ga.isConnected()); // one node graph need to be connect
       g.addNode(new NodeData(1));
-      ga.init(g);
       assertFalse(ga.isConnected()); // 2 node 0 edge need to be not connect.
       g.addNode(new NodeData(2));
 
       g.connect(0,1,0.2);
       g.connect(0,2,0.2);
       g.connect(2,0,0.2);
-      ga.init(g);
       assertFalse(ga.isConnected());
       g.connect(1,2,0.2);
-      ga.init(g);
       assertTrue(ga.isConnected());
    }
 
