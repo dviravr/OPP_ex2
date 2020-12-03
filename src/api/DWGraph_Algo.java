@@ -2,17 +2,64 @@ package api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-public class DWGraph_Algo implements dw_graph_algorithms {
+public class DWGraph_Algo implements dw_graph_algorithms{
 
    private directed_weighted_graph _graph;
    private final HashMap<Integer, Integer> _path;
+   private HashMap<Integer,Algo_Node> _nodes;
+
+
+
+   /**
+    * inner class thar represent node that will used in the algorithm.
+    * the Algo_Node is Similar to the main vertex of the program. With slight modifications of addition and omissions.
+    */
+   private static class Algo_Node implements Comparable<Algo_Node>{
+      private int _AlgoKey;
+      private  double _AlgoDist= -1;
+      private boolean _isVisited = false;
+
+      Algo_Node(int node_id){
+         _AlgoKey = node_id;
+      }
+
+      Algo_Node(node_data node){
+         _AlgoKey=node.getKey();
+      }
+
+      public int get_AlgoKey() {
+         return _AlgoKey;
+      }
+
+      public boolean isVisited() {
+         return _isVisited;
+      }
+
+      public void setVisited(boolean visited) {
+         _isVisited = visited;
+      }
+
+      public double get_AlgoDist() {
+         return _AlgoDist;
+      }
+
+      public void set_AlgoDist(double _AlgoDist) {
+         this._AlgoDist = _AlgoDist;
+      }
+
+      @Override
+      public int compareTo(@NotNull Algo_Node o) {
+         return Double.compare(this.get_AlgoDist(),o.get_AlgoDist());
+      }
+   }
+
 
    public DWGraph_Algo() {
       _graph = new DWGraph_DS();
@@ -22,17 +69,29 @@ public class DWGraph_Algo implements dw_graph_algorithms {
    public DWGraph_Algo(directed_weighted_graph g) {
       _graph = g;
       _path = new HashMap<>();
+      initNodes();
    }
 
+   private void initNodes(){
+      _nodes.clear();
+      for (node_data i: _graph.getV()) {
+         _nodes.put(i.getKey(),new Algo_Node(i));
+      }
+   }
    @Override
    public void init(directed_weighted_graph g) {
       _graph = g;
+      _nodes = new HashMap<>();
+      initNodes();
    }
+
 
    @Override
    public directed_weighted_graph getGraph() {
       return _graph;
    }
+
+
 
    @Override
    public directed_weighted_graph copy() {
@@ -42,25 +101,112 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean isConnected() {
-      return false;
+      if ((_graph.getV().isEmpty()) || (_graph.getV().size() == 1))
+         return true;
+      initNodes();
+      int temp = _graph.getV().iterator().next().getKey();
+      int connectCount = scan(getGraph(), temp, -1);
+
+      System.out.println(connectCount);
+      if (connectCount != getGraph().nodeSize())
+         return false;
+
+      directed_weighted_graph reverse = reverseGraph(getGraph());
+      int connectCountReverse = scan(reverse, temp, -1);
+      System.out.println(connectCountReverse);
+      return (connectCount == connectCountReverse);
    }
 
    @Override
    public double shortestPathDist(int src, int dest) {
-      return 0;
+      if(((!_graph.getV().contains(_graph.getNode(src))) ||
+              (!_graph.getV().contains(_graph.getNode(dest)))))
+         return -1;
+      if (src==dest) {return 0;}
+
+      scan(getGraph(),src,dest);
+      return _nodes.get(dest)._AlgoDist;
    }
 
    @Override
    public List<node_data> shortestPath(int src, int dest) {
-      return null;
+      if(shortestPathDist(src,dest)== -1)
+         return null;
+      Stack<node_data> path = new Stack<>();
+      path.push(_graph.getNode(dest));
+      int i = _path.get(dest);
+
+      while((_path.get(i) != null))
+      {
+         path.push(_graph.getNode(i));
+         i = _path.get(i);
+      }
+      path.push(_graph.getNode(src));
+      // change the stack to link list.
+      LinkedList<node_data> shortPath = new LinkedList<>();
+      int temp = path.size();
+      for (int j = 0; j < temp ; j++) {
+         shortPath.add(path.pop());
+      }
+      path = null;
+      return shortPath;
    }
+
+   private directed_weighted_graph reverseGraph(directed_weighted_graph g){
+      directed_weighted_graph ans = new DWGraph_DS();
+      for (node_data i: g.getV()) {
+         ans.addNode(i);
+      }
+      for (node_data j:g.getV()) {
+           for (edge_data i:g.getE(j.getKey())) {
+               ans.connect(i.getDest(),i.getSrc(),i.getWeight());
+          }
+      }
+      return ans;
+   }
+
+   private int scan(directed_weighted_graph g , int start,int dest) {
+      PriorityQueue<Algo_Node> _queue = new PriorityQueue<>(Algo_Node::compareTo);/////
+       _nodes = new HashMap<Integer, Algo_Node>();
+      initNodes();
+
+      int counter =1;
+      Algo_Node node = _nodes.get(start);
+
+      _nodes.get(start).set_AlgoDist(0);
+      _nodes.get(start).setVisited(true);
+      _queue.add(node);
+      _path.put(start, null);
+
+      while (!_queue.isEmpty()) {
+         node = _queue.poll();
+         if(node.get_AlgoKey()==dest)
+            break;
+         for (edge_data i : g.getE(node.get_AlgoKey())) {
+            double temp = node.get_AlgoDist() + i.getWeight();
+            double currectDist = _nodes.get(i.getDest()).get_AlgoDist();
+            if(!_nodes.get(i.getDest()).isVisited()){
+               counter++;
+               _nodes.get(i.getDest()).setVisited(true);
+            }
+            if ((currectDist == -1.0) || (temp < currectDist)) {
+               _nodes.get(i.getDest()).set_AlgoDist(temp);
+               _queue.add(_nodes.get(i.getDest()));
+               _path.put(i.getDest(), i.getSrc());
+            }
+         }
+      }
+      return counter;
+   }
+
+
 
    @Override
    public boolean save(String file) {
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();
-      try (FileWriter writer = new FileWriter("./graph.json")) {
+      try (FileWriter writer = new FileWriter(file)) {
          writer.write(gson.toJson(_graph));
          return true;
       } catch (IOException e) {
@@ -74,7 +220,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();
-      try (FileReader reader = new FileReader("./graph.json")) {
+      try (FileReader reader = new FileReader(file)) {
          _graph = gson.fromJson(reader, DWGraph_DS.class);
          return true;
       } catch (IOException e) {
