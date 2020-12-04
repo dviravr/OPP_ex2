@@ -1,16 +1,17 @@
 package gameClient;
 import api.edge_data;
 import gameClient.util.Point3D;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-public class CL_Pokemon {
+public class CL_Pokemon implements Comparable<CL_Pokemon> {
 	private edge_data _edge;
 	private final double _value;
 	private final int _type;
 	private final Point3D _pos;
 	private double min_dist;
 	private int min_ro;
-	private int closestAgent;
+	private int closestAgentNode;
 
 	public CL_Pokemon(Point3D p, int t, double v, double s, edge_data e) {
 		_type = t;
@@ -20,7 +21,7 @@ public class CL_Pokemon {
 		_pos = p;
 		min_dist = -1;
 		min_ro = -1;
-		closestAgent = -1;
+		closestAgentNode = -1;
 	}
 
 	public static CL_Pokemon init_from_json(String json) {
@@ -55,12 +56,12 @@ public class CL_Pokemon {
 		return _type;
 	}
 
-	public int getClosestAgent() {
-		return closestAgent;
+	public int getClosestAgentNode() {
+		return closestAgentNode;
 	}
 
-	public void setClosestAgent(int closestAgent) {
-		this.closestAgent = closestAgent;
+	public void setClosestAgentNode(int closestAgentNode) {
+		this.closestAgentNode = closestAgentNode;
 	}
 
 	//	public double getSpeed() {return _speed;}
@@ -82,5 +83,10 @@ public class CL_Pokemon {
 
 	public void setMin_ro(int min_ro) {
 		this.min_ro = min_ro;
+	}
+
+	@Override
+	public int compareTo(@NotNull CL_Pokemon o) {
+		return Double.compare(o.getValue(), getValue());
 	}
 }
