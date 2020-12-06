@@ -11,7 +11,7 @@ public class CL_Pokemon implements Comparable<CL_Pokemon> {
 	private final Point3D _pos;
 	private double min_dist;
 	private int min_ro;
-	private int closestAgentNode;
+	private CL_Agent closestAgent;
 
 	public CL_Pokemon(Point3D p, int t, double v, double s, edge_data e) {
 		_type = t;
@@ -21,7 +21,7 @@ public class CL_Pokemon implements Comparable<CL_Pokemon> {
 		_pos = p;
 		min_dist = -1;
 		min_ro = -1;
-		closestAgentNode = -1;
+		closestAgent = null;
 	}
 
 	public static CL_Pokemon init_from_json(String json) {
@@ -56,12 +56,12 @@ public class CL_Pokemon implements Comparable<CL_Pokemon> {
 		return _type;
 	}
 
-	public int getClosestAgentNode() {
-		return closestAgentNode;
+	public CL_Agent getClosestAgent() {
+		return closestAgent;
 	}
 
-	public void setClosestAgentNode(int closestAgentNode) {
-		this.closestAgentNode = closestAgentNode;
+	public void setClosestAgent(CL_Agent closestAgent) {
+		this.closestAgent = closestAgent;
 	}
 
 	//	public double getSpeed() {return _speed;}
