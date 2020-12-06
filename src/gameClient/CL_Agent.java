@@ -19,7 +19,7 @@ public class CL_Agent {
 	private node_data _curr_node;
 	private final directed_weighted_graph _gg;
 	private CL_Pokemon _curr_fruit;
-	private long _sg_dt;
+	private long timeToSleep;
 
 	private double _value;
 
@@ -171,18 +171,18 @@ public class CL_Agent {
 			double dt = w * norm / this.getSpeed();
 			ddt = (long) (1000.0 * dt);
 		}
-		this.set_sg_dt(ddt);
+		this.setTimeToSleep(ddt);
 	}
 
 	public edge_data get_curr_edge() {
 		return this._curr_edge;
 	}
 
-	public long get_sg_dt() {
-		return _sg_dt;
+	public long getTimeToSleep() {
+		return timeToSleep;
 	}
 
-	public void set_sg_dt(long _sg_dt) {
-		this._sg_dt = _sg_dt;
+	public void setTimeToSleep(long timeToSleep) {
+		this.timeToSleep = timeToSleep;
 	}
 }

@@ -2,21 +2,93 @@ package gameClient;
 
 import Server.Game_Server_Ex2;
 import api.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Ex2 {
+public class Ex2 extends Thread{
 
    private static game_service game;
+   private directed_weighted_graph gg;
 
-   public static void main(String[] args) {
-      test1();
+   public static void main(String[] args) { // TODO: 06/12/2020 static
+     test2();
+   }
+   private int getNumOfAgent(){
+
+      int numOfAgents = 0;
+      try {
+         JSONObject line;
+         line = new JSONObject(game.toString());
+         JSONObject gameServer = line.getJSONObject("GameServer");
+         numOfAgents = gameServer.getInt("agents");
+      } catch (JSONException e) {
+         e.printStackTrace();
+      }
+      return numOfAgents;
    }
 
+   private void test2(){
+      game = Game_Server_Ex2.getServer(23); // you have [0,23] games
+      String g = game.getGraph();
+
+      dw_graph_algorithms gg = new DWGraph_Algo();
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
+      Gson gson = gsonBuilder.create();
+      gg.init(gson.fromJson(g, DWGraph_DS.class));
+      System.out.println(gg);
+      
+      for (int i = 0; i < getNumOfAgent(); i++) {
+         // TODO: 06/12/2020 need to change locateAgents() that it get int i that represent the id 
+         // TODO: 06/12/2020 the locateAgents need to
+         String ind = ""+i;
+         Thread thredi= new Thread("ind");
+         thredi.start();
+      }
+      startGame();
+
+
+   }
+
+   private void startGame(){
+      game.startGame();
+      notifyAll();
+   }
+
+   public void run(){
+
+      // TODO: 06/12/2020 make graph not local variabels
+     // locateAgents(graph,)
+      int x = locateAgents(gg).remove(0);
+    CL_Agent agent = new CL_Agent(gg,x);
+    long time;
+   try {
+         wait();
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
+      while (game.isRunning()){
+         game.move();
+        time = agent.getTimeToSleep();// TODO: 06/12/2020   set_SDT(0);
+         try {
+            sleep(time); // TODO: 06/12/2020 chenge set sdt
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         }
+         if(!agent.isMoving()) {
+            agent.setCurrNode(agent.getNextNode());
+            agent.setNextNode(closestPokemon(gg, agent).remove(0).getKey());
+         }
+      }
+
+
+   }
    private static void test1() {
       game = Game_Server_Ex2.getServer(23); // you have [0,23] games
       String g = game.getGraph();
