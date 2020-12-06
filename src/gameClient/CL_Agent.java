@@ -156,8 +156,8 @@ public class CL_Agent {
 		this._curr_fruit = curr_fruit;
 	}
 
-	public void set_SDT(long ddtt) {
-		long ddt = ddtt;
+	public long getTimeToSleep() {
+		long ddt = 0;
 		if (this._curr_edge != null) {
 			double w = get_curr_edge().getWeight();
 			geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
@@ -171,18 +171,10 @@ public class CL_Agent {
 			double dt = w * norm / this.getSpeed();
 			ddt = (long) (1000.0 * dt);
 		}
-		this.setTimeToSleep(ddt);
+		return ddt;
 	}
 
 	public edge_data get_curr_edge() {
 		return this._curr_edge;
-	}
-
-	public long getTimeToSleep() {
-		return timeToSleep;
-	}
-
-	public void setTimeToSleep(long timeToSleep) {
-		this.timeToSleep = timeToSleep;
 	}
 }
