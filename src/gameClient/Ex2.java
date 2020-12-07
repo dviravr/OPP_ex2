@@ -16,8 +16,8 @@ public class Ex2 implements Runnable {
    private static directed_weighted_graph gg;
 
    public static void main(String[] args) { // TODO: 06/12/2020 static
-      test1();
-//      test2();
+//      test1();
+      test2();
    }
 
    //
@@ -56,7 +56,7 @@ public class Ex2 implements Runnable {
 
    @Override
    public void run() {
-      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
+      game = Game_Server_Ex2.getServer(5); // you have [0,23] games
       String g = game.getGraph();
       gg = game.getJava_Graph_Not_to_be_used();
 
@@ -72,8 +72,8 @@ public class Ex2 implements Runnable {
       // TODO: 06/12/2020 make graph not local variabels
       // locateAgents(graph,)
       int x = locateAgents().remove(0);
-      CL_Agent agent = getAgentById(0);
-      game.chooseNextEdge(agent.getID(), x);
+      CL_Agent a = getAgentById(0);
+      game.chooseNextEdge(a.getID(), x);
       long time;
 //      try {
 //         wait();
@@ -81,25 +81,32 @@ public class Ex2 implements Runnable {
 //         e.printStackTrace();
 //      }
       game.startGame();
-
+      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
+      _ar.setAgents(agents);
       while (game.isRunning()) {
-         game.move();
-         List<node_data> closestPokemonPath = closestPokemon(agent);
-         while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
-            int newDest = closestPokemonPath.remove(0).getKey();
-            if (newDest != agent.getSrcNode()) {
-               game.chooseNextEdge(agent.getID(), newDest);
-               game.move();
-               System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + "   turned to node: " + newDest);
-               System.out.println(agent.get_curr_fruit().get_edge());
-               System.out.println(agent.get_curr_fruit());
-               try {
-                  Thread.sleep(agent.getTimeToSleep());
-               } catch (InterruptedException e) {
-                  e.printStackTrace();
-               }
+         long t = game.timeToEnd();
+//         String lg = game.move();
+         agents = Arena.getAgents(game.move(), gg);
+//         game.move();
+         for (CL_Agent agent : agents) {
+
+            List<node_data> closestPokemonPath = closestPokemon(agent);
+            while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
+               int newDest = closestPokemonPath.remove(0).getKey();
+               if (newDest != agent.getSrcNode()) {
+                  game.chooseNextEdge(agent.getID(), newDest);
+                  game.move();
+                  System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + "   turned to node: " + newDest);
+                  System.out.println(agent.get_curr_fruit().get_edge());
+                  System.out.println(agent.get_curr_fruit());
+                  try {
+                     Thread.sleep(agent.getTimeToSleep());
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  }
 //                     System.out.println(i + ") " + a + ") " + agent + "  move to node: " + newDest);
 //                     System.out.println(game.getPokemons());
+               }
             }
          }
 
@@ -116,6 +123,7 @@ public class Ex2 implements Runnable {
 //            agent.setNextNode(closestPokemon(agent).remove(0).getKey());
 //         }
       }
+      System.out.println(game.toString());
    }
 
    private static void test1() {
@@ -211,7 +219,7 @@ public class Ex2 implements Runnable {
          }
          double newDist = ga.shortestPathDist(agent.getSrcNode(), pSrc);
          double oldDist = ga.shortestPathDist(agent.getSrcNode(), agent.get_curr_fruit().get_edge().getSrc());
-         if (closestAgent > newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
+         if (closestAgent >= newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
 //            set old closest agent's pokemon to null
             if (pokemon.getClosestAgent() != null) {
                pokemon.getClosestAgent().set_curr_fruit(null);
