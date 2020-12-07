@@ -121,8 +121,12 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public List<node_data> shortestPath(int src, int dest) {
-      if (shortestPathDist(src, dest) == -1)
+      if (src == dest) {
+         return new ArrayList<>();
+      }
+      if (shortestPathDist(src, dest) == -1) {
          return null;
+      }
       Stack<node_data> path = new Stack<>();
       path.push(_graph.getNode(dest));
       int i = _path.get(dest);
