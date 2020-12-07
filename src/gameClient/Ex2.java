@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Ex2 extends Thread {
+public class Ex2 implements Runnable {
 
    private static Arena _ar;
    private static game_service game;
@@ -20,13 +20,20 @@ public class Ex2 extends Thread {
 //      test2();
    }
 
-//
+   //
    private static void test2() {
-      game = Game_Server_Ex2.getServer(23); // you have [0,23] games
+//      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
 //      String g = game.getGraph();
-      gg = game.getJava_Graph_Not_to_be_used();
-
-      System.out.println(gg);
+//      gg = game.getJava_Graph_Not_to_be_used();
+//
+////      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
+//      _ar = new Arena();
+//      _ar.setGraph(gg);
+//      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
+//      String info = game.toString();
+//      System.out.println(info);
+//      System.out.println(g);
+//      System.out.println(game.getPokemons());
 
 //      for (int i = 0; i < getNumOfAgent(); i++) {
 //         // TODO: 06/12/2020 need to change locateAgents() that it get int i that represent the id
@@ -49,11 +56,24 @@ public class Ex2 extends Thread {
 
    @Override
    public void run() {
+      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
+      String g = game.getGraph();
+      gg = game.getJava_Graph_Not_to_be_used();
+
+//      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
+      _ar = new Arena();
+      _ar.setGraph(gg);
+      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
+      String info = game.toString();
+      System.out.println(info);
+      System.out.println(g);
+      System.out.println(game.getPokemons());
 
       // TODO: 06/12/2020 make graph not local variabels
       // locateAgents(graph,)
       int x = locateAgents().remove(0);
       CL_Agent agent = getAgentById(0);
+      game.chooseNextEdge(agent.getID(), x);
       long time;
 //      try {
 //         wait();
@@ -64,16 +84,37 @@ public class Ex2 extends Thread {
 
       while (game.isRunning()) {
          game.move();
-         time = agent.getTimeToSleep();// TODO: 06/12/2020   set_SDT(0);
-         try {
-            Thread.sleep(time); // TODO: 06/12/2020 chenge set sdt
-         } catch (InterruptedException e) {
-            e.printStackTrace();
+         List<node_data> closestPokemonPath = closestPokemon(agent);
+         while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
+            int newDest = closestPokemonPath.remove(0).getKey();
+            if (newDest != agent.getSrcNode()) {
+               game.chooseNextEdge(agent.getID(), newDest);
+               game.move();
+               System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + "   turned to node: " + newDest);
+               System.out.println(agent.get_curr_fruit().get_edge());
+               System.out.println(agent.get_curr_fruit());
+               try {
+                  Thread.sleep(agent.getTimeToSleep());
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
+               }
+//                     System.out.println(i + ") " + a + ") " + agent + "  move to node: " + newDest);
+//                     System.out.println(game.getPokemons());
+            }
          }
-         if (!agent.isMoving()) {
-            agent.setCurrNode(agent.getNextNode());
-            agent.setNextNode(closestPokemon(agent).remove(0).getKey());
-         }
+
+
+//         game.move();
+//         time = agent.getTimeToSleep();// TODO: 06/12/2020   set_SDT(0);
+//         try {
+//            Thread.sleep(time); // TODO: 06/12/2020 chenge set sdt
+//         } catch (InterruptedException e) {
+//            e.printStackTrace();
+//         }
+//         if (!agent.isMoving()) {
+//            agent.setCurrNode(agent.getNextNode());
+//            agent.setNextNode(closestPokemon(agent).remove(0).getKey());
+//         }
       }
    }
 
@@ -99,14 +140,18 @@ public class Ex2 extends Thread {
          game.chooseNextEdge(i, newDest);
 //         timeToSleepList.add(timeToSleep(i, newDest)); // todo: what is the agent id
       }
+//      game.startGame();
       int i = 0;
       System.out.println(game.timeToEnd());
+      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
+      _ar.setAgents(agents);
       while (game.isRunning()) {
          long t = game.timeToEnd();
-         String lg = game.move();
-         List<CL_Agent> log = Arena.getAgents(lg, gg);
-         for (int a = 0; a < log.size(); a++) {
-            CL_Agent agent = log.get(a);
+//         String lg = game.move();
+         agents = Arena.getAgents(game.move(), gg);
+//         _ar.setAgents(agents);
+         for (CL_Agent agent : agents) {
+//            CL_Agent agent = log.get(a);
 //            System.out.println(i + ") " + a + ") " + agent + "  move to node: " + agent.getSrcNode());
 //            System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + "   turned to node: " + agent.getSrcNode());
             int dest = agent.getNextNode();
@@ -138,13 +183,14 @@ public class Ex2 extends Thread {
       dw_graph_algorithms ga = new DWGraph_Algo(gg);
       _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
       ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
-      int dest = findBestPokemon(agent, pokemons, ga);
-      if (agent.getSrcNode() == dest) {
-         dest = agent.get_curr_fruit().get_edge().getDest();
-      }
-      if (dest != -1) {
+      int pSrc = findBestPokemon(agent, pokemons, ga);
+      if (pSrc != -1) {
+         List<node_data> path = ga.shortestPath(agent.getSrcNode(), pSrc);
+         if (agent.getSrcNode() == pSrc) {
+            path.add(gg.getNode(agent.get_curr_fruit().get_edge().getDest()));
+         }
 //      todo: maybe sleep until there is a new pokemon
-         return ga.shortestPath(agent.getSrcNode(), dest);
+         return path;
       } else {
          return new ArrayList<>();
       }
@@ -202,12 +248,8 @@ public class Ex2 extends Thread {
 //      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
       ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
       PriorityQueue<CL_Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
-      ArrayList<CL_Agent> agents = new ArrayList<>();
+//      ArrayList<CL_Agent> agents = new ArrayList<>();
       ArrayList<Integer> destList = new ArrayList<>();
-//      for (CL_Pokemon pokemon : pokemons) {
-//         Arena.updateEdge(pokemon, gg);
-//         mostValuesPokemons.add(pokemon);
-//      }
       int numOfAgents = getNumOfAgent();
       for (int i = 0; i < numOfAgents; i++) {
          int src = -1;
@@ -225,11 +267,12 @@ public class Ex2 extends Thread {
 //            todo: check if we can count on this that the agents ids start from 0
             agent.set_curr_fruit(pokemon);
             pokemon.setClosestAgent(agent);
-            agents.add(agent);
+//            agents.add(agent);
          }
          destList.add(dest);
       }
-      _ar.setAgents(agents);
+//      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
+//      _ar.setAgents(agents);
       return destList;
    }
 

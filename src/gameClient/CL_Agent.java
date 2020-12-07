@@ -157,21 +157,25 @@ public class CL_Agent {
 	}
 
 	public long getTimeToSleep() {
-		long ddt = 0;
+		long t = 0;
 		if (this._curr_edge != null) {
 			double w = get_curr_edge().getWeight();
 			geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
 			geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
 			double de = src.distance(dest);
 			double dist = _pos.distance(dest);
-			if (this.get_curr_fruit().get_edge() == this.get_curr_edge()) {
-				dist = _curr_fruit.getLocation().distance(this._pos);
+			if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
+				dist = get_curr_fruit().getLocation().distance(this._pos);
 			}
 			double norm = dist / de;
 			double dt = w * norm / this.getSpeed();
-			ddt = (long) (1000.0 * dt);
+			t = (long) (1000.0 * dt);
 		}
-		return ddt;
+		return t;
+	}
+
+	public long getTimeAfterEating() {
+		return 0;
 	}
 
 	public edge_data get_curr_edge() {

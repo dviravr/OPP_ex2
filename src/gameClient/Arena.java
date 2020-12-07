@@ -60,9 +60,30 @@ public class Arena {
 		return ans;
 	}
 
+	public static ArrayList<CL_Agent> getAgents(String aa, ArrayList<CL_Agent> agents, directed_weighted_graph gg) {
+		ArrayList<CL_Agent> ans = new ArrayList<CL_Agent>();
+		try {
+			JSONObject ttt = new JSONObject(aa);
+			JSONArray ags = ttt.getJSONArray("Agents");
+			for (int i = 0; i < ags.length(); i++) {
+				CL_Agent c = new CL_Agent(gg, 0);
+				c.update(ags.get(i).toString());
+				ans.add(c);
+				for (CL_Agent agent : agents) {
+					if (agent.getID() == c.getID()) {
+						c.set_curr_fruit(agent.get_curr_fruit());
+					}
+				}
+			}
+			//= getJSONArray("Agents");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return ans;
+	}
+
 	public static ArrayList<CL_Pokemon> json2Pokemons(String fs, ArrayList<CL_Pokemon> pokemons, directed_weighted_graph g) {
-		ArrayList<CL_Pokemon> ans = new ArrayList<CL_Pokemon>();
-		boolean found = false;
+		ArrayList<CL_Pokemon> ans = new ArrayList<>();
 		try {
 			JSONObject ttt = new JSONObject(fs);
 			JSONArray ags = ttt.getJSONArray("Pokemons");
