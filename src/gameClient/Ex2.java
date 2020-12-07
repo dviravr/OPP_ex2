@@ -2,23 +2,22 @@ package gameClient;
 
 import Server.Game_Server_Ex2;
 import api.*;
-import okio.Timeout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.TransferQueue;
 
 public class Ex2 extends Thread {
 
+   private static Arena _ar;
    private static game_service game;
    private static directed_weighted_graph gg;
 
    public static void main(String[] args) { // TODO: 06/12/2020 static
-//      test1();
-      test2();
+      test1();
+//      test2();
    }
 
 //
@@ -39,6 +38,7 @@ public class Ex2 extends Thread {
 //      }
       Thread client = new Thread(new Ex2());
       client.start();
+      startGame();
 //      game.startGame();
    }
 
@@ -83,6 +83,9 @@ public class Ex2 extends Thread {
       gg = game.getJava_Graph_Not_to_be_used();
 //      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
       node_data nn = gg.getNode(10);
+      _ar = new Arena();
+      _ar.setGraph(gg);
+      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
       String info = game.toString();
       System.out.println(info);
       System.out.println(g);
@@ -110,77 +113,32 @@ public class Ex2 extends Thread {
             int src = agent.getSrcNode();
 //            long timeToSleep = timeToSleep(r);
             int id = agent.getID();
-            if (dest == -1) {
-               List<node_data> closestPokemonPath = closestPokemon(agent);
-               while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
-                  newDest = closestPokemonPath.remove(0).getKey();
-                  if (newDest != agent.getSrcNode()) {
-                     game.chooseNextEdge(id, newDest);
-                     game.move();
-                     System.out.println("Agent: " + id + ", val: " + agent.getValue() + "   turned to node: " + newDest);
-                     System.out.println(agent.get_curr_fruit().get_edge());
-                     System.out.println(agent.get_curr_fruit());
+//            if (dest == -1) {
+            List<node_data> closestPokemonPath = closestPokemon(agent);
+            while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
+               newDest = closestPokemonPath.remove(0).getKey();
+               if (newDest != agent.getSrcNode()) {
+                  game.chooseNextEdge(id, newDest);
+                  game.move();
+                  System.out.println("Agent: " + id + ", val: " + agent.getValue() + "   turned to node: " + newDest);
+                  System.out.println(agent.get_curr_fruit().get_edge());
+                  System.out.println(agent.get_curr_fruit());
 //                     System.out.println(i + ") " + a + ") " + agent + "  move to node: " + newDest);
 //                     System.out.println(game.getPokemons());
-                  }
                }
             }
+//            }
          }
          i++;
       }
       System.out.println(game.toString());
    }
 
-   private static long timeToSleep(CL_Agent agent) {
-      long t;
-      double dist = 1;
-      edge_data e = agent.get_curr_edge();
-      ArrayList<CL_Pokemon> pokemons = Arena.json2Pokemons(game.getPokemons());
-//      for (CL_Pokemon pokemon : pokemons) {
-//         check if the agent is going to eat one of the pokemons
-      if (isGoingToEatPokemon(agent)) {
-         double x = agent.getLocation().distance(agent.get_curr_fruit().getLocation());
-//            double x = agent.getLocation().distance(pokemon.getLocation());
-         double y = agent.getLocation().distance(gg.getNode(e.getDest()).getLocation());
-         dist = x / y;
-//            break;
-      }
-//      }
-//      time = distance / speed
-      t = (long) ((e.getWeight() * dist * 1000) / agent.getSpeed());
-      return t;
-   }
-
    private static List<node_data> closestPokemon(CL_Agent agent) {
       dw_graph_algorithms ga = new DWGraph_Algo(gg);
-      ArrayList<CL_Pokemon> pokemons = Arena.json2Pokemons(game.getPokemons());
-      int dest = -1;
-      for (CL_Pokemon pokemon : pokemons) {
-//         looping on the pokemons to look after the best pokemont to catch
-         Arena.updateEdge(pokemon, gg);
-         if (agent.get_curr_fruit() == null) {
-            agent.set_curr_fruit(pokemon);
-         }
-         int pSrc = pokemon.get_edge().getSrc();
-         double max = -1;
-         double closestAgent = Double.MAX_VALUE;
-         if (pokemon.getClosestAgent() != null) {
-             closestAgent = ga.shortestPathDist(pokemon.getClosestAgent().getSrcNode(), pSrc);
-         }
-         double newDist = ga.shortestPathDist(agent.getSrcNode(), pSrc);
-         double oldDist = ga.shortestPathDist(agent.get_curr_fruit().get_edge().getSrc(), pSrc);
-//         if (pokemon.getValue() > max) {
-//            max = pokemon.getValue();
-         if (closestAgent > newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
-//            set old closest agent's pokemon to null
-            if (pokemon.getClosestAgent() != null) {
-               pokemon.getClosestAgent().set_curr_fruit(null);
-            }
-            pokemon.setClosestAgent(agent);
-            agent.set_curr_fruit(pokemon);
-            dest = pSrc;
-         }
-      }
+      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
+      ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
+      int dest = findBestPokemon(agent, pokemons, ga);
       if (agent.getSrcNode() == dest) {
          dest = agent.get_curr_fruit().get_edge().getDest();
       }
@@ -192,36 +150,64 @@ public class Ex2 extends Thread {
       }
    }
 
-   private static boolean shouldSwitchPokemon(double newDist, double oldDist, double newValue, CL_Agent agent) {
-      if (agent.get_curr_fruit() != null) {
-         int factor = 3;
-         long t = game.timeToEnd();
-         double oldValue = agent.get_curr_fruit().getValue();
-         if (newDist <= oldDist * factor) {
-            if (newValue >= oldValue * factor) {
-//               return true if the new pokemon is closer and the value is bigger
-               return true;
+   private static int findBestPokemon(CL_Agent agent, ArrayList<CL_Pokemon> pokemons, dw_graph_algorithms ga) {
+      int dest;
+      if (agent.get_curr_fruit() == null) {
+         agent.set_curr_fruit(pokemons.get(0));
+      }
+      dest = agent.get_curr_fruit().get_edge().getSrc();
+      for (CL_Pokemon pokemon : pokemons) {
+//         looping on the pokemons to look after the best pokemon to catch
+         int pSrc = pokemon.get_edge().getSrc();
+         double closestAgent = Double.MAX_VALUE;
+         if (pokemon.getClosestAgent() != null) {
+            closestAgent = ga.shortestPathDist(pokemon.getClosestAgent().getSrcNode(), pSrc);
+         }
+         double newDist = ga.shortestPathDist(agent.getSrcNode(), pSrc);
+         double oldDist = ga.shortestPathDist(agent.getSrcNode(), agent.get_curr_fruit().get_edge().getSrc());
+         if (closestAgent > newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
+//            set old closest agent's pokemon to null
+            if (pokemon.getClosestAgent() != null) {
+               pokemon.getClosestAgent().set_curr_fruit(null);
             }
-//            checking the ratio between the value's of the pokemons
-            return ((oldValue / oldDist) * factor > (newValue / newDist));
-         } else {
-            if ((oldValue / oldDist) * factor <= (newValue / newDist)) {
-//               checking if there is enough time to catch the new pokemon
-               return (agent.getSpeed() / newDist) > t;
-            }
+            pokemon.setClosestAgent(agent);
+            agent.set_curr_fruit(pokemon);
+            dest = pSrc;
          }
       }
-      return true;
+      return dest;
+   }
+
+   private static boolean shouldSwitchPokemon(double newDist, double oldDist, double newValue, CL_Agent agent) {
+      int factor = 1;
+      long t = game.timeToEnd();
+      double oldValue = agent.get_curr_fruit().getValue();
+      if (newDist <= oldDist * factor) {
+         if (newValue >= oldValue * factor) {
+//               return true if the new pokemon is closer and the value is bigger
+            return true;
+         }
+//            checking the ratio between the value's of the pokemons
+         return ((oldValue / oldDist) * factor > (newValue / newDist));
+      } else {
+         if ((oldValue / oldDist) * factor <= (newValue / newDist)) {
+//               checking if there is enough time to catch the new pokemon
+            return (agent.getSpeed() / newDist) > t;
+         }
+      }
+      return false;
    }
 
    private static ArrayList<Integer> locateAgents() {
-      ArrayList<CL_Pokemon> pokemons = Arena.json2Pokemons(game.getPokemons());
-      PriorityQueue<CL_Pokemon> mostValuesPokemons = new PriorityQueue<>();
+//      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
+      ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
+      PriorityQueue<CL_Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
+      ArrayList<CL_Agent> agents = new ArrayList<>();
       ArrayList<Integer> destList = new ArrayList<>();
-      for (CL_Pokemon pokemon : pokemons) {
-         Arena.updateEdge(pokemon, gg);
-         mostValuesPokemons.add(pokemon);
-      }
+//      for (CL_Pokemon pokemon : pokemons) {
+//         Arena.updateEdge(pokemon, gg);
+//         mostValuesPokemons.add(pokemon);
+//      }
       int numOfAgents = getNumOfAgent();
       for (int i = 0; i < numOfAgents; i++) {
          int src = -1;
@@ -239,9 +225,11 @@ public class Ex2 extends Thread {
 //            todo: check if we can count on this that the agents ids start from 0
             agent.set_curr_fruit(pokemon);
             pokemon.setClosestAgent(agent);
+            agents.add(agent);
          }
          destList.add(dest);
       }
+      _ar.setAgents(agents);
       return destList;
    }
 

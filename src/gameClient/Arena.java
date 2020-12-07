@@ -26,15 +26,17 @@ public class Arena {
 	private static Point3D MIN = new Point3D(0, 100, 0);
 	private static Point3D MAX = new Point3D(0, 100, 0);
 	private directed_weighted_graph _gg;
-	private List<CL_Agent> _agents;
-	private List<CL_Pokemon> _pokemons;
+	private ArrayList<CL_Agent> _agents;
+	private ArrayList<CL_Pokemon> _pokemons;
 	private List<String> _info;
 
 	public Arena() {
-		_info = new ArrayList<String>();
+		_info = new ArrayList<>();
+		_pokemons = new ArrayList<>();
+		_agents = new ArrayList<>();
 	}
 
-	private Arena(directed_weighted_graph g, List<CL_Agent> r, List<CL_Pokemon> p) {
+	private Arena(directed_weighted_graph g, ArrayList<CL_Agent> r, ArrayList<CL_Pokemon> p) {
 		_gg = g;
 		this.setAgents(r);
 		this.setPokemons(p);
@@ -58,8 +60,9 @@ public class Arena {
 		return ans;
 	}
 
-	public static ArrayList<CL_Pokemon> json2Pokemons(String fs) {
+	public static ArrayList<CL_Pokemon> json2Pokemons(String fs, ArrayList<CL_Pokemon> pokemons, directed_weighted_graph g) {
 		ArrayList<CL_Pokemon> ans = new ArrayList<CL_Pokemon>();
+		boolean found = false;
 		try {
 			JSONObject ttt = new JSONObject(fs);
 			JSONArray ags = ttt.getJSONArray("Pokemons");
@@ -72,6 +75,12 @@ public class Arena {
 				String p = pk.getString("pos");
 				CL_Pokemon f = new CL_Pokemon(new Point3D(p), t, v, 0, null);
 				ans.add(f);
+				for (CL_Pokemon pokemon : pokemons) {
+					if (p.equals(pokemon.getLocation().toString()) && v == pokemon.getValue() && t == pokemon.getType()) {
+						f.setClosestAgent(pokemon.getClosestAgent());
+					}
+				}
+				updateEdge(f, g);
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -195,19 +204,19 @@ public class Arena {
 
 	}
 
-	public List<CL_Agent> getAgents() {
+	public ArrayList<CL_Agent> getAgents() {
 		return _agents;
 	}
 
-	public void setAgents(List<CL_Agent> f) {
+	public void setAgents(ArrayList<CL_Agent> f) {
 		this._agents = f;
 	}
 
-	public List<CL_Pokemon> getPokemons() {
+	public ArrayList<CL_Pokemon> getPokemons() {
 		return _pokemons;
 	}
 
-	public void setPokemons(List<CL_Pokemon> f) {
+	public void setPokemons(ArrayList<CL_Pokemon> f) {
 		this._pokemons = f;
 	}
 
