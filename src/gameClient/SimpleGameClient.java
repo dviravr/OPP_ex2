@@ -5,6 +5,7 @@ import api.edge_data;
 import api.game_service;
 import api.node_data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ public class SimpleGameClient {
 		String info = game.toString();
 		System.out.println(info);
 		System.out.println(g);
+		Arena ar = new Arena();
 		System.out.println(game.getPokemons());
 		int src_node = 0;  // arbitrary node, you should start at one of the fruits
 		game.addAgent(src_node);
@@ -37,7 +39,7 @@ public class SimpleGameClient {
 		while (game.isRunning()) {
 			long t = game.timeToEnd();
 			String lg = game.move();
-			List<CL_Agent> log = Arena.getAgents(lg, gg);
+			ArrayList<CL_Agent> log = Arena.getAgents(lg, gg);
 			for (int a = 0; a < log.size(); a++) {
 				CL_Agent r = log.get(a);
 				int dest = r.getNextNode();
