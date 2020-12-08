@@ -175,7 +175,12 @@ public class CL_Agent {
 	}
 
 	public long getTimeAfterEating() {
-		return 0;
+		double w = get_curr_edge().getWeight();
+		geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
+		geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
+		double de = src.distance(dest);
+
+		return (long)((de*w / this.getSpeed())*1000.0) - getTimeToSleep();
 	}
 
 	public edge_data get_curr_edge() {

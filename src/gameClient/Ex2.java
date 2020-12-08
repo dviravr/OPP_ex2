@@ -2,6 +2,7 @@ package gameClient;
 
 import Server.Game_Server_Ex2;
 import api.*;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,10 +17,51 @@ public class Ex2 implements Runnable {
    private static directed_weighted_graph gg;
 
    public static void main(String[] args) { // TODO: 06/12/2020 static
-//      test1();
-      test2();
+     test3();
+      //test2();
    }
+   private static void test3() {
+      game = Game_Server_Ex2.getServer(5); // you have [0,23] games
+      String g = game.getGraph();
+      gg = game.getJava_Graph_Not_to_be_used();
 
+//      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
+      _ar = new Arena();
+      _ar.setGraph(gg);
+      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
+      String info = game.toString();
+      System.out.println(info);
+      System.out.println(g);
+      System.out.println(game.getPokemons());
+
+      ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
+      PriorityQueue<CL_Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
+
+
+      ArrayList<Integer> destList = new ArrayList<>();
+      int numOfAgents = getNumOfAgent(), src, dest;
+      MyThread[] myThreads = new MyThread[numOfAgents];
+      int i =0;
+      /////////error mabay problem in the service.
+      for (CL_Agent agent : Arena.getAgents(game.getAgents(), gg)) {
+         CL_Pokemon pokemon = mostValuesPokemons.poll();
+         if (agent != null && pokemon != null) {
+
+            src = pokemon.get_edge().getSrc();
+            dest = pokemon.get_edge().getDest();
+            myThreads[i]= new MyThread("TH"+i ,agent,game,gg,_ar);
+            game.addAgent(src);
+//            todo: check if we can count on this that the agents ids start from 0
+            agent.set_curr_fruit(pokemon);
+            pokemon.setClosestAgent(agent);
+            i++;
+         }
+//      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
+//      _ar.setAgents(agents);
+      }
+      if()
+      MyStartGame(myThreads);
+   }
    //
    private static void test2() {
 //      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
@@ -45,13 +87,15 @@ public class Ex2 implements Runnable {
 //      }
       Thread client = new Thread(new Ex2());
       client.start();
-      startGame();
+     // MyStartGame();
 //      game.startGame();
    }
 
-   private static void startGame() {
-//      game.startGame();
-//      notifyAll();
+   private static void MyStartGame(@NotNull MyThread[] myThreads){
+      game.startGame();
+      for (MyThread myThread : myThreads) {
+         myThread.start();
+      }
    }
 
    @Override
@@ -140,6 +184,7 @@ public class Ex2 implements Runnable {
       System.out.println(g);
       System.out.println(game.getPokemons());
       ArrayList<Integer> destList = locateAgents();
+
       game.startGame();
       ArrayList<Long> timeToSleepList = new ArrayList<>();
       int newDest;
@@ -153,6 +198,7 @@ public class Ex2 implements Runnable {
       System.out.println(game.timeToEnd());
       ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
       _ar.setAgents(agents);
+
       while (game.isRunning()) {
          long t = game.timeToEnd();
 //         String lg = game.move();
