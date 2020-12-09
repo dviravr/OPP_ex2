@@ -22,8 +22,6 @@ public class CL_Agent {
 	private node_data _curr_node;
 	private final directed_weighted_graph _gg;
 	private CL_Pokemon _curr_fruit;
-	private List<node_data> _destList;
-
 	private double _value;
 
 
@@ -34,7 +32,6 @@ public class CL_Agent {
 		_pos = _curr_node.getLocation();
 		_id = -1;
 		setSpeed(0);
-		_destList = new ArrayList<>();
 	}
 
 	public void update(String json) {
@@ -165,7 +162,6 @@ public class CL_Agent {
 		if (this._curr_edge != null) {
 			double w = get_curr_edge().getWeight();
 			double norm = getNorm();
-			System.out.println("before eating. norm: " + norm);
 			double dt = w * norm / this.getSpeed();
 			t = (long) (1000.0 * dt);
 		}
@@ -173,41 +169,28 @@ public class CL_Agent {
 	}
 
 	public long getTimeAfterEating() {
-		double w = get_curr_edge().getWeight();
-		double norm = 1 - getNorm();
-		System.out.println("after eating. norm: " + norm);
-		double dt = w * norm / this.getSpeed();
-		return (long) (1000.0 * dt);
+		long t = 0;
+		if (this._curr_edge != null) {
+			double w = get_curr_edge().getWeight();
+			double norm = 1 - getNorm();
+			double dt = w * norm / this.getSpeed();
+			t = (long) (1000.0 * dt);
+		}
+		return t;
 	}
 
 	private double getNorm() {
-//		if (!get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
-//			return 1;
-//		}
 		geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
 		geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
 		double de = src.distance(dest);
 		double dist = _pos.distance(dest);
 		if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
-			dist = get_curr_fruit().getLocation().distance(this._pos);
-			System.out.println("enter");
+			dist = get_curr_fruit().getLocation().distance(src);
 		}
 		return dist / de;
 	}
 
 	public edge_data get_curr_edge() {
 		return this._curr_edge;
-	}
-
-	public List<node_data> getDestList() {
-		return _destList;
-	}
-
-	public int getAndRemoveDest() {
-		return _destList.remove(0).getKey();
-	}
-
-	public void setDestList(List<node_data> _destList) {
-		this._destList = _destList;
 	}
 }
