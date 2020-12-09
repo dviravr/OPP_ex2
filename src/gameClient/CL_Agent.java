@@ -7,6 +7,9 @@ import api.node_data;
 import gameClient.util.Point3D;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CL_Agent {
 	public static final double EPS = 0.0001;
 	private static final int _count = 0;
@@ -19,8 +22,6 @@ public class CL_Agent {
 	private node_data _curr_node;
 	private final directed_weighted_graph _gg;
 	private CL_Pokemon _curr_fruit;
-	private long timeToSleep;
-
 	private double _value;
 
 
@@ -160,14 +161,7 @@ public class CL_Agent {
 		long t = 0;
 		if (this._curr_edge != null) {
 			double w = get_curr_edge().getWeight();
-			geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
-			geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
-			double de = src.distance(dest);
-			double dist = _pos.distance(dest);
-			if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
-				dist = get_curr_fruit().getLocation().distance(this._pos);
-			}
-			double norm = dist / de;
+			double norm = getNorm();
 			double dt = w * norm / this.getSpeed();
 			t = (long) (1000.0 * dt);
 		}
@@ -175,12 +169,25 @@ public class CL_Agent {
 	}
 
 	public long getTimeAfterEating() {
-		double w = get_curr_edge().getWeight();
+		long t = 0;
+		if (this._curr_edge != null) {
+			double w = get_curr_edge().getWeight();
+			double norm = 1 - getNorm();
+			double dt = w * norm / this.getSpeed();
+			t = (long) (1000.0 * dt);
+		}
+		return t;
+	}
+
+	private double getNorm() {
 		geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
 		geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
 		double de = src.distance(dest);
-
-		return (long)((de*w / this.getSpeed())*1000.0) - getTimeToSleep();
+		double dist = _pos.distance(dest);
+		if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
+			dist = get_curr_fruit().getLocation().distance(src);
+		}
+		return dist / de;
 	}
 
 	public edge_data get_curr_edge() {
