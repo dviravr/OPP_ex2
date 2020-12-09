@@ -14,6 +14,7 @@ public class Ex2 implements Runnable {
    private static Arena _ar;
    private static game_service game;
    private static directed_weighted_graph gg;
+   private static final int scenario = 23;
 
    public static void main(String[] args) { // TODO: 06/12/2020 static
 //      test1();
@@ -22,41 +23,13 @@ public class Ex2 implements Runnable {
 
    //
    private static void test2() {
-//      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
-//      String g = game.getGraph();
-//      gg = game.getJava_Graph_Not_to_be_used();
-//
-////      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
-//      _ar = new Arena();
-//      _ar.setGraph(gg);
-//      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
-//      String info = game.toString();
-//      System.out.println(info);
-//      System.out.println(g);
-//      System.out.println(game.getPokemons());
-
-//      for (int i = 0; i < getNumOfAgent(); i++) {
-//         // TODO: 06/12/2020 need to change locateAgents() that it get int i that represent the id
-//         // TODO: 06/12/2020 the locateAgents need to
-////         String ind = "" + i;
-//         Thread thredi = new Thread("thread number: " + i);
-//         System.out.println("agent: " + i + " start");
-//         thredi.start();
-//      }
       Thread client = new Thread(new Ex2());
       client.start();
-      startGame();
-//      game.startGame();
-   }
-
-   private static void startGame() {
-//      game.startGame();
-//      notifyAll();
    }
 
    @Override
    public void run() {
-      game = Game_Server_Ex2.getServer(5); // you have [0,23] games
+      game = Game_Server_Ex2.getServer(scenario); // you have [0,23] games
       String g = game.getGraph();
       gg = game.getJava_Graph_Not_to_be_used();
 
@@ -70,64 +43,60 @@ public class Ex2 implements Runnable {
       System.out.println(game.getPokemons());
 
       // TODO: 06/12/2020 make graph not local variabels
-      // locateAgents(graph,)
-      int x = locateAgents().remove(0);
-      CL_Agent a = getAgentById(0);
-      game.chooseNextEdge(a.getID(), x);
-      long time;
-//      try {
-//         wait();
-//      } catch (InterruptedException e) {
-//         e.printStackTrace();
-//      }
+      locateAgents();
       game.startGame();
-      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
-      _ar.setAgents(agents);
+      ArrayList<CL_Agent> agents = _ar.getAgents();
+      for (CL_Agent agent : agents) {
+         game.chooseNextEdge(agent.getID(), agent.get_curr_fruit().get_edge().getDest());
+      }
+      System.out.println(agents);
       while (game.isRunning()) {
          long t = game.timeToEnd();
 //         String lg = game.move();
-         agents = Arena.getAgents(game.move(), gg);
-//         game.move();
+         agents = Arena.getAgents(game.getAgents(), gg);
+         game.move();
          for (CL_Agent agent : agents) {
-
+//            try {
+//               Thread.sleep(agent.);
+//            } catch (InterruptedException e) {
+//               e.printStackTrace();
+//            }
             List<node_data> closestPokemonPath = closestPokemon(agent);
             while (!closestPokemonPath.isEmpty() && agent.get_curr_fruit() != null) {
                int newDest = closestPokemonPath.remove(0).getKey();
                if (newDest != agent.getSrcNode()) {
                   game.chooseNextEdge(agent.getID(), newDest);
+//                  if (agent.getNextNode() != -1) {
                   game.move();
-                  System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + "   turned to node: " + newDest);
-                  System.out.println(agent.get_curr_fruit().get_edge());
-                  System.out.println(agent.get_curr_fruit());
+                  System.out.println(game.getAgents());
+                  System.out.println("Agent: " + agent.getID() + ", val: " + agent.getValue() + ", speed: " + agent.getSpeed() + "  src: " + agent.getSrcNode() + "  turned to node: " + agent.getNextNode());
+                  System.out.println("fruit edge: " + agent.get_curr_fruit().get_edge());
+                  System.out.println("fruit: " + agent.get_curr_fruit());
+                  System.out.println("agent edge: " + agent.get_curr_edge());
+                  long tts = agent.getTimeToSleep();
                   try {
-                     Thread.sleep(agent.getTimeToSleep());
+                     System.out.println("time to sleep: " + tts);
+                     Thread.sleep(tts);
+                     if (agent.get_curr_edge() != null && agent.get_curr_edge().equals(agent.get_curr_fruit().get_edge())) {
+                        tts = agent.getTimeAfterEating();
+                        System.out.println("suppose to eat. time to sleep: " + tts);
+                        game.move();
+                        Thread.sleep(tts);
+                     }
                   } catch (InterruptedException e) {
                      e.printStackTrace();
                   }
-//                     System.out.println(i + ") " + a + ") " + agent + "  move to node: " + newDest);
-//                     System.out.println(game.getPokemons());
+//                  }
                }
             }
+            agent.set_curr_fruit(null);
          }
-
-
-//         game.move();
-//         time = agent.getTimeToSleep();// TODO: 06/12/2020   set_SDT(0);
-//         try {
-//            Thread.sleep(time); // TODO: 06/12/2020 chenge set sdt
-//         } catch (InterruptedException e) {
-//            e.printStackTrace();
-//         }
-//         if (!agent.isMoving()) {
-//            agent.setCurrNode(agent.getNextNode());
-//            agent.setNextNode(closestPokemon(agent).remove(0).getKey());
-//         }
       }
       System.out.println(game.toString());
    }
 
    private static void test1() {
-      game = Game_Server_Ex2.getServer(2); // you have [0,23] games
+      game = Game_Server_Ex2.getServer(scenario); // you have [0,23] games
       String g = game.getGraph();
       gg = game.getJava_Graph_Not_to_be_used();
 //      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
@@ -141,22 +110,22 @@ public class Ex2 implements Runnable {
       System.out.println(game.getPokemons());
       ArrayList<Integer> destList = locateAgents();
       game.startGame();
-      ArrayList<Long> timeToSleepList = new ArrayList<>();
       int newDest;
-      for (int i = 0; i < destList.size(); i++) {
-         newDest = destList.get(i);
-         game.chooseNextEdge(i, newDest);
-//         timeToSleepList.add(timeToSleep(i, newDest)); // todo: what is the agent id
+      ArrayList<CL_Agent> agents = _ar.getAgents();
+      for (CL_Agent agent : agents) {
+         game.chooseNextEdge(agent.getID(), agent.get_curr_fruit().get_edge().getDest());
       }
+//      for (int i = 0; i < destList.size(); i++) {
+//         newDest = destList.get(i);
+//         game.chooseNextEdge(i, newDest);
+//      }
 //      game.startGame();
-      int i = 0;
+      System.out.println(agents);
       System.out.println(game.timeToEnd());
-      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
-      _ar.setAgents(agents);
       while (game.isRunning()) {
          long t = game.timeToEnd();
 //         String lg = game.move();
-         agents = Arena.getAgents(game.move(), gg);
+//         agents = _ar.getAgents();
 //         _ar.setAgents(agents);
          for (CL_Agent agent : agents) {
 //            CL_Agent agent = log.get(a);
@@ -182,7 +151,6 @@ public class Ex2 implements Runnable {
             }
 //            }
          }
-         i++;
       }
       System.out.println(game.toString());
    }
@@ -253,10 +221,8 @@ public class Ex2 implements Runnable {
    }
 
    private static ArrayList<Integer> locateAgents() {
-//      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
       ArrayList<CL_Pokemon> pokemons = _ar.getPokemons();
       PriorityQueue<CL_Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
-//      ArrayList<CL_Agent> agents = new ArrayList<>();
       ArrayList<Integer> destList = new ArrayList<>();
       int numOfAgents = getNumOfAgent();
       for (int i = 0; i < numOfAgents; i++) {
@@ -266,21 +232,20 @@ public class Ex2 implements Runnable {
          if (pokemon != null) {
             src = pokemon.get_edge().getSrc();
             dest = pokemon.get_edge().getDest();
-         } else {
-//            todo: if pokemon is null maybe get a random src
          }
          game.addAgent(src);
-         CL_Agent agent = getAgentById(i);
-         if (agent != null && pokemon != null) {
-//            todo: check if we can count on this that the agents ids start from 0
-            agent.set_curr_fruit(pokemon);
-            pokemon.setClosestAgent(agent);
-//            agents.add(agent);
-         }
          destList.add(dest);
       }
-//      ArrayList<CL_Agent> agents = Arena.getAgents(game.move(), gg);
-//      _ar.setAgents(agents);
+      ArrayList<CL_Agent> agents = Arena.getAgents(game.getAgents(), gg);
+      for (CL_Agent agent : agents) {
+         for (CL_Pokemon pokemon : pokemons) {
+            if (pokemon.get_edge().getSrc() == agent.getSrcNode()) {
+               agent.set_curr_fruit(pokemon);
+               pokemon.setClosestAgent(agent);
+            }
+         }
+      }
+      _ar.setAgents(agents);
       return destList;
    }
 

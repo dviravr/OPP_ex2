@@ -160,14 +160,8 @@ public class CL_Agent {
 		long t = 0;
 		if (this._curr_edge != null) {
 			double w = get_curr_edge().getWeight();
-			geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
-			geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
-			double de = src.distance(dest);
-			double dist = _pos.distance(dest);
-			if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
-				dist = get_curr_fruit().getLocation().distance(this._pos);
-			}
-			double norm = dist / de;
+			double norm = getNorm();
+			System.out.println("before eating. norm: " + norm);
 			double dt = w * norm / this.getSpeed();
 			t = (long) (1000.0 * dt);
 		}
@@ -175,7 +169,23 @@ public class CL_Agent {
 	}
 
 	public long getTimeAfterEating() {
-		return 0;
+		double w = get_curr_edge().getWeight();
+		double norm = 1 - getNorm();
+		System.out.println("after eating. norm: " + norm);
+		double dt = w * norm / this.getSpeed();
+		return (long) (1000.0 * dt);
+	}
+
+	private double getNorm() {
+		geo_location dest = _gg.getNode(get_curr_edge().getDest()).getLocation();
+		geo_location src = _gg.getNode(get_curr_edge().getSrc()).getLocation();
+		double de = src.distance(dest);
+		double dist = _pos.distance(dest);
+		if (get_curr_fruit().get_edge().equals(this.get_curr_edge())) {
+			dist = get_curr_fruit().getLocation().distance(this._pos);
+			System.out.println("enter");
+		}
+		return dist / de;
 	}
 
 	public edge_data get_curr_edge() {
