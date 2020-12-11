@@ -75,7 +75,7 @@ public class Ex2_Client implements Runnable {
 
 	@Override
 	public void run() {
-		int scenario_num = 11;
+		int scenario_num = 14;
 		game_service game = Game_Server_Ex2.getServer(scenario_num); // you have [0,23] games
 		//	int id = 999;
 		//	game.login(id);
@@ -92,7 +92,7 @@ public class Ex2_Client implements Runnable {
 		while (game.isRunning()) {
 			moveAgants(game, gg);
 			try {
-				if (ind % 7 == 0) {
+			if (ind % 7 == 0) {
 					_win.repaint();
 				}
 				Thread.sleep(dt);

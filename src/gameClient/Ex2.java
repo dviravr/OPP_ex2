@@ -5,6 +5,10 @@ import api.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -14,17 +18,34 @@ public class Ex2 implements Runnable {
    private static Arena _ar;
    private static game_service game;
    private static directed_weighted_graph gg;
-   private static final int scenario = 23;
+   private static final int scenario = 11;
+   BigFrame _win;
 
-   public static void main(String[] args) { // TODO: 06/12/2020 static
-//      test1();
+   public static void main(String[] args) throws InterruptedException { // TODO: 06/12/2020 static
+
+
+     //test3();
       test2();
    }
 
    private static void test2() {
       Thread client = new Thread(new Ex2());
       client.start();
+     // MyStartGame();
+//      game.startGame();
    }
+
+
+//
+//   private static void MyStartGame(@NotNull MyThread[] myThreads){
+//      game.startGame();
+//      for (MyThread th : myThreads) {
+//         th.start();
+//      }
+//   }
+//  
+
+
 
    @Override
    public void run() {
@@ -32,7 +53,7 @@ public class Ex2 implements Runnable {
       String g = game.getGraph();
       gg = game.getJava_Graph_Not_to_be_used();
 
-//      game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
+      //game.login(316095660);  // please use your ID only as a key. uncomment this will upload your results to the server
       _ar = new Arena();
       _ar.setGraph(gg);
       _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), gg));
@@ -42,7 +63,10 @@ public class Ex2 implements Runnable {
       System.out.println(game.getPokemons());
 
       locateAgents();
+      _win = new BigFrame(_ar,scenario,game);
+
       game.startGame();
+
       ArrayList<CL_Agent> agents = _ar.getAgents();
       for (CL_Agent agent : agents) {
          game.chooseNextEdge(agent.getID(), agent.get_curr_fruit().get_edge().getDest());
@@ -52,6 +76,9 @@ public class Ex2 implements Runnable {
       while (game.isRunning()) {
          long t = game.timeToEnd();
          String lg = game.move();
+         _ar.setAgents(Arena.getAgents(lg,_ar.getAgents(),gg));
+   //      _win.updateGame(game);
+         _win.update(_ar);
          agents = Arena.getAgents(lg, agents, gg);
          System.out.println(lg);
          long tts = getMinTimeToSleep(agents);
@@ -206,4 +233,5 @@ public class Ex2 implements Runnable {
       }
       return numOfAgents;
    }
+
 }

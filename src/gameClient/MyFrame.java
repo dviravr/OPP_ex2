@@ -46,7 +46,7 @@ public class MyFrame extends JFrame {
 		int w = this.getWidth();
 		int h = this.getHeight();
 		g.clearRect(0, 0, w, h);
-		//	updateFrame();
+		updateFrame();
 		drawPokemons(g);
 		drawGraph(g);
 		drawAgants(g);
@@ -54,14 +54,34 @@ public class MyFrame extends JFrame {
 
 	}
 
-	private void drawInfo(Graphics g) {
-		List<String> str = _ar.get_info();
-		String dt = "none";
-		for (int i = 0; i < str.size(); i++) {
-			g.drawString(str.get(i) + " dt: " + dt, 100, 60 + i * 20);
-		}
+//	public void paint(Graphics g) {
+//		Image buffer_image;
+//		Graphics buffer_graphics;
+//		int w = this.getWidth();
+//		int h = this.getHeight();
+//		// Create a new "canvas"
+//		buffer_image = createImage(w, h);
+//		drawAgants(buffer_image.getGraphics());
+//		drawPokemons(buffer_image.getGraphics());
+//		drawGraph(buffer_image.getGraphics());
+//		drawInfo(buffer_image.getGraphics());
+//
+//		buffer_graphics= buffer_image.getGraphics();
+//
+//		// Draw on the new "canvas"
+//		paintComponents(buffer_graphics);
+//
+//		// "Switch" the old "canvas" for the new one
+//		g.drawImage(buffer_image, 0, 0, this);
+//	}
+		private void drawInfo (Graphics g){
+			List<String> str = _ar.get_info();
+			String dt = "none";
+			for (int i = 0; i < str.size(); i++) {
+				g.drawString(str.get(i) + " dt: " + dt, 100, 60 + i * 20);
+			}
 
-	}
+		}
 
 	private void drawGraph(Graphics g) {
 		directed_weighted_graph gg = _ar.getGraph();
