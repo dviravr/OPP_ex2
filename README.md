@@ -1,6 +1,6 @@
-# Weighted Graph
+# Directed Weighted Graph
 
-An implementation of weighted graph in java
+An implementation of directed weighted graph in java
 
 ### Node Data class
 
