@@ -96,6 +96,7 @@ class EdgeDataAdapter implements JsonSerializer<edge_data>, JsonDeserializer<edg
 
    @Override
    public JsonElement serialize(edge_data edge, Type type, JsonSerializationContext jsonSerializationContext) {
+//      write edge to a json
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("src", edge.getSrc());
       jsonObject.addProperty("w", edge.getWeight());
@@ -105,6 +106,7 @@ class EdgeDataAdapter implements JsonSerializer<edge_data>, JsonDeserializer<edg
 
    @Override
    public edge_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//      read edge from a json
       int src = jsonElement.getAsJsonObject().get("src").getAsInt();
       int dest = jsonElement.getAsJsonObject().get("dest").getAsInt();
       double w = jsonElement.getAsJsonObject().get("w").getAsDouble();

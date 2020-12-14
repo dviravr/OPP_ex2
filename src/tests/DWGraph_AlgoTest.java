@@ -3,21 +3,33 @@ package tests;
 import api.*;
 import org.junit.jupiter.api.Test;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class DWGraph_AlgoTest {
 
    @Test
    void init() {
-   }
-
-   @Test
-   void getGraph() {
+      directed_weighted_graph g = new DWGraph_DS();
+      dw_graph_algorithms ga = new DWGraph_Algo();
+      ga.init(g);
+      assertEquals(g, new DWGraph_DS());
+      g.addNode(new NodeData(0));
+      assertNotEquals(g, new DWGraph_DS());
+      assertEquals(g, ga.getGraph());
    }
 
    @Test
    void copy() {
+      directed_weighted_graph g = new DWGraph_DS();
+      dw_graph_algorithms ga = new DWGraph_Algo();
+      for (int i = 0; i < 10; i++) {
+         g.addNode(new NodeData(i, new GeoLocation(i, i, i)));
+      }
+      for (int i = 0; i < 9; i++) {
+         g.connect(i, i + 1, i / 2.0);
+      }
+      ga.init(g);
+      assertEquals(ga.getGraph(), ga.copy());
    }
 
    @Test

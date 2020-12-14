@@ -195,6 +195,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean save(String file) {
+//      save grape in json format
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();
@@ -209,6 +210,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    @Override
    public boolean load(String file) {
+//      load grape from json
       GsonBuilder gsonBuilder = new GsonBuilder();
       gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
       Gson gson = gsonBuilder.create();

@@ -28,7 +28,9 @@ public class NodeData implements node_data {
       _tag = n.getTag();
       _info = n.getInfo();
       _weight = n.getWeight();
-      _pos = new GeoLocation(n.getLocation());
+      if (n.getLocation() != null) {
+         _pos = new GeoLocation(n.getLocation());
+      }
    }
 
    @Override
@@ -105,6 +107,7 @@ public class NodeData implements node_data {
 class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<node_data> {
    @Override
    public JsonElement serialize(node_data node, Type type, JsonSerializationContext jsonSerializationContext) {
+//      write node to a json
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("pos", node.getLocation().toString());
       jsonObject.addProperty("id", node.getKey());
@@ -113,6 +116,7 @@ class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<nod
 
    @Override
    public node_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//      read node from a json
       int id = jsonElement.getAsJsonObject().get("id").getAsInt();
       String pos = jsonElement.getAsJsonObject().get("pos").getAsString();
       String[] location = pos.split(",");

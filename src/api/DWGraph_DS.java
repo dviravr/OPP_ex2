@@ -1,8 +1,5 @@
 package api;
 
-import com.google.gson.*;
-
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class DWGraph_DS implements directed_weighted_graph {
@@ -22,6 +19,15 @@ public class DWGraph_DS implements directed_weighted_graph {
    public DWGraph_DS(directed_weighted_graph g) {
 //      copy constructor
       this();
+      for (node_data node : g.getV()) {
+         addNode(new NodeData(node));
+      }
+//      connect every node to his neighbors
+      for (node_data node : getV()) {
+         for (edge_data edge : g.getE(node.getKey())) {
+            connect(edge.getSrc(), edge.getDest(), edge.getWeight());
+         }
+      }
    }
 
    @Override
@@ -41,6 +47,7 @@ public class DWGraph_DS implements directed_weighted_graph {
    public void addNode(node_data n) {
 //      if the node exist don't do nothing
       if (!hasNode(n.getKey())) {
+//         adding new node to the graph
          _graphNodes.put(n.getKey(), n);
          _graphEdges.put(n.getKey(), new HashMap<>());
          _destNi.put(n.getKey(), new HashSet<>());
@@ -50,7 +57,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 
    @Override
    public void connect(int src, int dest, double w) {
-      if (hasNode(src) && hasNode(dest) && w >= 0 && src != dest) { // todo: maybe just w > 0
+      if (hasNode(src) && hasNode(dest) && w >= 0 && src != dest) {
          if (!hasEdge(src, dest)) {
             edgeSize++;
          }
@@ -94,6 +101,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 
    @Override
    public edge_data removeEdge(int src, int dest) {
+//      disconnect to nodes
       if (hasEdge(src, dest)) {
          edgeSize--;
          modeCount++;
