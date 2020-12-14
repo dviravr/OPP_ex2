@@ -1,9 +1,7 @@
 package gameClient;
 
-import api.directed_weighted_graph;
-import api.edge_data;
-import api.geo_location;
-import api.node_data;
+import Server.Game_Server_Ex2;
+import api.*;
 import gameClient.util.Point3D;
 import gameClient.util.Range;
 import gameClient.util.Range2D;
@@ -18,14 +16,25 @@ import java.util.List;
 public class MyFrame2 extends JPanel implements ActionListener {
     private Arena _ar;
     private gameClient.util.Range2Range _w2f;
+    private  int _senario;
+   private game_service _game;
     private Timer timer;
 
-    MyFrame2(Arena ar) {
-        this.setName("Cache them");
-        _ar =ar ;
-        timer = new Timer(1000,this);
 
+
+    MyFrame2(Arena arena,int gameID,game_service game_service ) {
+
+        _ar = arena;
+        _senario = gameID;
+        _game = game_service;
     }
+//
+//    MyFrame2(Arena ar) {
+//        this.setName("Cache them");
+//        _ar =ar ;
+//        timer = new Timer(1000,this);
+//
+//    }
 
 
 
@@ -34,9 +43,9 @@ public class MyFrame2 extends JPanel implements ActionListener {
 //        //int _ind = 0;
 //    }
 
-    public void update(Arena ar) {
+    public void update (Arena ar) {
         this._ar = ar;
-        updateFrame(ar);
+       // updateFrame(ar);
         repaint();
 
 
@@ -50,41 +59,40 @@ public class MyFrame2 extends JPanel implements ActionListener {
         _w2f = Arena.w2f(g, frame);
     }
 
-    public void paint(Graphics g) {
+    public void paintComponents(Graphics g) {
        super.paint(g);
+
         int w = this.getWidth();
         int h = this.getHeight();
         g.clearRect(0, 0, w, h);
 
 
         updateFrame(_ar);
-        drawPokemons(g);
         drawGraph(g);
+        drawPokemons(g);
         drawAgants(g);
         drawInfo(g);
-
+        paintAgentValue(g);
+        paintSenario(g);
+        paintTimeToEnd(g);
     }
 
-    //	public void paint(Graphics g) {
-//		Image buffer_image;
-//		Graphics buffer_graphics;
-//		int w = this.getWidth();
-//		int h = this.getHeight();
-//		// Create a new "canvas"
-//		buffer_image = createImage(w, h);
-//		drawAgants(buffer_image.getGraphics());
-//		drawPokemons(buffer_image.getGraphics());
-//		drawGraph(buffer_image.getGraphics());
-//		drawInfo(buffer_image.getGraphics());
-//
-//		buffer_graphics= buffer_image.getGraphics();
-//
-//		// Draw on the new "canvas"
-//		paintComponents(buffer_graphics);
-//
-//		// "Switch" the old "canvas" for the new one
-//		g.drawImage(buffer_image, 0, 0, this);
-//	}
+    	public void paint(Graphics g) {
+		Image buffer_image;
+		Graphics buffer_graphics;
+		int w = this.getWidth();
+		int h = this.getHeight();
+		// Create a new "canvas"
+		buffer_image = createImage(w, h);
+		buffer_graphics= buffer_image.getGraphics();
+
+		// Draw on the new "canvas"
+		paintComponents(buffer_graphics);
+
+		// "Switch" the old "canvas" for the new one
+		g.drawImage(buffer_image, 0, 0, this);
+	}
+
     private void drawInfo(Graphics g) {
         List<String> str = _ar.get_info();
         String dt = "none";
@@ -128,7 +136,7 @@ public class MyFrame2 extends JPanel implements ActionListener {
 
                     geo_location fp = this._w2f.world2frame(c);
                     g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
-                    //	g.drawString(""+n.getKey(), fp.ix(), fp.iy()-4*r);
+                    	//g.drawString(""+n.getKey(), fp.ix(), fp.iy()-4*r);
 
                 }
             }
@@ -141,6 +149,7 @@ public class MyFrame2 extends JPanel implements ActionListener {
         g.setColor(Color.red);
         int i = 0;
         while (rs != null && i < rs.size()) {
+            CL_Agent agent = rs.get(i);
             geo_location c = rs.get(i).getLocation();
             int r = 8;
             i++;
@@ -148,6 +157,8 @@ public class MyFrame2 extends JPanel implements ActionListener {
 
                 geo_location fp = this._w2f.world2frame(c);
                 g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
+                String str = String.format("agent %d \n score: %.1f",agent.getID(),agent.getValue());
+                g.drawString(str, (int)fp.x()-15 ,(int)fp.y()-r*5);
             }
         }
     }
@@ -172,8 +183,31 @@ public class MyFrame2 extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+    }
+    private void paintAgentValue(Graphics g){
+        g.setColor(Color.gray.darker());
+        g.setFont(new Font(null,Font.BOLD,22));
+        g.drawString("Agent Value:",this.getWidth()-175,30);
+        g.setColor(Color.green.darker());
+        g.setFont(new Font(null,Font.BOLD,22));
+        for(CL_Agent agent :_ar.getAgents()){
+            String str = String.format("agent %d:  score: %.1f",agent.getID(),agent.getValue());
+            g.drawString(str,this.getWidth()-200,50 +40*agent.getID());
+        }
+    }
 
 
+    private void paintSenario(Graphics g) {
+        g.setColor(Color.black);
+        g.setFont(new Font(null, Font.BOLD, 25));
+        g.drawString("senario "+ _senario, 40, 35);
+    }
+
+    private void paintTimeToEnd(Graphics g) {
+        g.setColor(Color.GREEN.darker().darker());
+        g.setFont(new Font(null, Font.BOLD, 22));
+        long timeToEnd= _game.timeToEnd();
+        g.drawString("Time to end: " + (float)timeToEnd / 100, 40,55);
 
     }
 }
