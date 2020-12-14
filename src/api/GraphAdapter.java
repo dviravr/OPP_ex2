@@ -10,6 +10,7 @@ public class GraphAdapter implements JsonSerializer<directed_weighted_graph>, Js
 
     @Override
     public JsonElement serialize(directed_weighted_graph graph, Type type, JsonSerializationContext jsonSerializationContext) {
+//      write graph to a json
         JsonArray edgesArray = new JsonArray();
         JsonArray nodesArray = new JsonArray();
         for (node_data node : graph.getV()) {
@@ -26,8 +27,8 @@ public class GraphAdapter implements JsonSerializer<directed_weighted_graph>, Js
 
     @Override
     public directed_weighted_graph deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//      read graph to a json
         directed_weighted_graph graph = new DWGraph_DS();
-
         JsonArray nodesArray = jsonElement.getAsJsonObject().getAsJsonArray("Nodes");
         JsonArray edgesArray = jsonElement.getAsJsonObject().getAsJsonArray("Edges");
         for (JsonElement na : nodesArray) {
