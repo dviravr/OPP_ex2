@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class GameFrame extends JFrame implements ActionListener, Runnable {
-   private final GamePanel panel;
+   private final GamePanel _panel;
    private Arena _ar;
    private final game_service _game;
 
@@ -22,29 +22,29 @@ public class GameFrame extends JFrame implements ActionListener, Runnable {
       this.setTitle("POKEMON - DAVID AND DVIR");
       this.setLocation(20, 20);
 
-      panel = new GamePanel(arena, gameID, _game);
-      panel.setBounds(0, 150, this.getWidth(), getHeight() - 150);
-      this.add(panel);
+      _panel = new GamePanel(arena, gameID, _game);
+      _panel.setBounds(0, 150, this.getWidth(), getHeight() - 150);
+      this.add(_panel);
       this.setVisible(true);
    }
 
    public void update(Arena ar) {
       this._ar = ar;
-      panel.update(ar);
+      _panel.update(ar);
    }
 
    @Override
    public void run() {
       while (_game.isRunning()) {
          repaint();
-         panel.update(_ar);
-         panel.repaint();
+         _panel.update(_ar);
+         _panel.repaint();
       }
    }
 
    @Override
    public void actionPerformed(ActionEvent e) {
       update(_ar);
-      panel.repaint();
+      _panel.repaint();
    }
 }

@@ -8,11 +8,11 @@ import java.awt.event.ActionListener;
 
 public class LoginFrame extends JFrame {
 
-    private JButton start;
-    private int scenario = 0;
-    private long id = 316095660;
-    JTextField idTF = new JTextField(7);
-    JTextField scenTF = new JTextField(3);
+    private final JButton _startGame;
+    private int _scenario = 0;
+    private long _id = 316095660;
+    JTextField _idTF = new JTextField(7);
+    JTextField _scenarioTF = new JTextField(3);
 
     LoginFrame() {
         this.setSize(500, 500);
@@ -24,21 +24,21 @@ public class LoginFrame extends JFrame {
         JPanel startP = new JPanel();
 
         JLabel idL = new JLabel("ID: ");
-        JLabel scenL = new JLabel("Scenario: ");
+        JLabel scenarioL = new JLabel("Scenario: ");
 
         Font f = new Font("TimesRoman", Font.BOLD, 24);
-        idTF.setFont(f);
+        _idTF.setFont(f);
         idL.setFont(f);
-        scenTF.setFont(f);
-        scenL.setFont(f);
+        _scenarioTF.setFont(f);
+        scenarioL.setFont(f);
 
-        start = new JButton("START GAME");
+        _startGame = new JButton("START GAME");
 
         idP.add(idL);
-        idP.add(idTF);
-        scenP.add(scenL);
-        scenP.add(scenTF);
-        startP.add(start);
+        idP.add(_idTF);
+        scenP.add(scenarioL);
+        scenP.add(_scenarioTF);
+        startP.add(_startGame);
 
         ImageIcon image = new ImageIcon("data/catch.jpg");
         JLabel header = new JLabel("", image, JLabel.CENTER);
@@ -51,17 +51,17 @@ public class LoginFrame extends JFrame {
 
         this.add(theBox);
 
-        start.addActionListener(new ListenForButton());
+        _startGame.addActionListener(new ListenForButton());
         this.setVisible(true);
     }
 
     private class ListenForButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == start) {
+            if (e.getSource() == _startGame) {
                 try {
-                    id = Long.parseLong(idTF.getText());
-                    scenario = Integer.parseInt(scenTF.getText());
-                    if (scenario < 0) {
+                    _id = Long.parseLong(_idTF.getText());
+                    _scenario = Integer.parseInt(_scenarioTF.getText());
+                    if (_scenario < 0) {
                         throw new NumberFormatException();
                     }
                     startGame();
@@ -79,11 +79,11 @@ public class LoginFrame extends JFrame {
     }
 
     public int getScenario() {
-        return scenario;
+        return _scenario;
     }
 
     public long getId() {
-        return id;
+        return _id;
     }
 
 }
