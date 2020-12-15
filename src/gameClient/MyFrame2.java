@@ -16,6 +16,7 @@ public class MyFrame2 extends JPanel implements ActionListener {
    private gameClient.util.Range2Range _w2f;
    private int _scenario;
    private game_service _game;
+   long time;
    private Timer timer;
 
 
@@ -51,8 +52,9 @@ public class MyFrame2 extends JPanel implements ActionListener {
       drawAgants(g);
       drawInfo(g);
       paintAgentValue(g);
+      paintPic(g);
       paintSenario(g);
-      paintTimeToEnd(g);
+      paintTimeToEnd(g,time);
    }
 
    public void paint(Graphics g) {
@@ -97,13 +99,17 @@ public class MyFrame2 extends JPanel implements ActionListener {
          for (Pokemon pokemon : pokemons) {
             Point3D c = pokemon.getLocation();
             int r = 10;
-            g.setColor(Color.green);
+            Image poc = new ImageIcon("data/poc1.png").getImage();
+
+          //  g.setColor(Color.green);
             if (pokemon.getType() < 0) {
-               g.setColor(Color.orange);
+               poc = new ImageIcon("data/poc2.png").getImage();
+               //    g.setColor(Color.orange);
             }
             if (c != null) {
                geo_location fp = this._w2f.world2frame(c);
-               g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
+               g.drawImage(poc,(int) fp.x() - r, (int) fp.y() - r,4 * r, 4 * r,null);
+              // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
             }
          }
       }
@@ -118,9 +124,27 @@ public class MyFrame2 extends JPanel implements ActionListener {
             int r = 8;
             if (c != null) {
                geo_location fp = this._w2f.world2frame(c);
-               g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
-               String str = String.format("agent %d \n score: %.1f", agent.getID(), agent.getValue());
-               g.drawString(str, (int) fp.x() - 15, (int) fp.y() - r * 5);
+               Image image = new ImageIcon("data/ash1.jpg").getImage();;
+               switch (agent.getID()%3) {
+                  case 0: {
+                     image = new ImageIcon("data/ash1.jpg").getImage();
+                     break;
+                  }
+                  case 1: {
+                     image = new ImageIcon("data/brokpoc.jpg").getImage();
+                     break;
+                  }
+                  case 2: {
+                     image = new ImageIcon("data/mistypoc.jpg").getImage();
+                     break;
+                  }
+               }
+
+               g.drawImage(image,(int) fp.x() - 2*r, (int) fp.y() - 2*r,4 * r, 4 * r,null);
+              // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 4 * r, 3 * r);
+
+               String str = String.format("agent %d", agent.getID());
+               g.drawString(str, (int) fp.x() , (int) fp.y() - r * 5);
             }
          }
       }
@@ -141,20 +165,43 @@ public class MyFrame2 extends JPanel implements ActionListener {
       geo_location dFrame = _w2f.world2frame(dest);
       g.drawLine((int) sFrame.x(), (int) sFrame.y(), (int) dFrame.x(), (int) dFrame.y());
    }
+public void startTimmer(long t){
+      time = t;
+      timer = new Timer(1,this);
+      timer.start();
+}
 
    @Override
    public void actionPerformed(ActionEvent e) {
+      paintTimeToEnd(this.getGraphics(),--time);
    }
 
    private void paintAgentValue(Graphics g) {
       g.setColor(Color.gray.darker());
       g.setFont(new Font(null, Font.BOLD, 22));
-      g.drawString("Agent Value:", this.getWidth() - 175, 30);
+      g.drawString("Agent Value:", this.getWidth() - 275, 30);
       g.setColor(Color.green.darker());
       g.setFont(new Font(null, Font.BOLD, 22));
       for (Agent agent : _ar.getAgents()) {
+         Image image = new ImageIcon("data/ash1.jpg").getImage();;
+
+         switch (agent.getID()%3) {
+            case 0: {
+               image = new ImageIcon("data/ash1.jpg").getImage();
+               break;
+            }
+            case 1: {
+               image = new ImageIcon("data/brokpoc.jpg").getImage();
+               break;
+            }
+            case 2: {
+               image = new ImageIcon("data/mistypoc.jpg").getImage();
+               break;
+            }
+         }
+         g.drawImage(image,this.getWidth() -330, 40 + 30 * agent.getID(),25, 25,null);
          String str = String.format("agent %d:  score: %.1f", agent.getID(), agent.getValue());
-         g.drawString(str, this.getWidth() - 200, 50 + 40 * agent.getID());
+         g.drawString(str, this.getWidth() -300, 58 + 30 * agent.getID());
       }
    }
 
@@ -165,10 +212,19 @@ public class MyFrame2 extends JPanel implements ActionListener {
       g.drawString("scenario " + _scenario, 40, 35);
    }
 
-   private void paintTimeToEnd(Graphics g) {
+   private void paintTimeToEnd(Graphics g,long t) {
       g.setColor(Color.GREEN.darker().darker());
       g.setFont(new Font(null, Font.BOLD, 22));
-      long timeToEnd = _game.timeToEnd();
-      g.drawString("Time to end: " + (float) timeToEnd / 100, 40, 55);
+    //  long timeToEnd = _game.timeToEnd();
+      g.drawString("Time to end: " + (float) t / 100, 40, 55);
    }
+
+   private void paintPic(Graphics g){
+
+        Image image = new ImageIcon("data/catch.jpg").getImage();
+
+
+         g.drawImage(image,this.getWidth()/2 -225, 40 ,450, 200,null);
+   }
+
 }
