@@ -59,11 +59,15 @@ public class DWGraph_DS implements directed_weighted_graph {
    public void connect(int src, int dest, double w) {
       if (hasNode(src) && hasNode(dest) && w >= 0 && src != dest) {
          if (!hasEdge(src, dest)) {
+//            if there is an edge don't increase the edge size
             edgeSize++;
+         }
+         if (!(hasEdge(src, dest) && w == getEdge(src, dest).getWeight())) {
+//            if there is an edge in the same weight don't increase the MC
+            modeCount++;
          }
          _destNi.get(dest).add(src);
          _graphEdges.get(src).put(dest, new EdgeData(src, dest, w));
-         modeCount++;
       }
    }
 

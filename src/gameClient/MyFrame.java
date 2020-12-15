@@ -11,16 +11,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class MyFrame2 extends JPanel implements ActionListener {
+public class MyFrame extends JPanel {
    private Arena _ar;
    private gameClient.util.Range2Range _w2f;
-   private int _scenario;
-   private game_service _game;
-   long time;
-   private Timer timer;
+   private final int _scenario;
+   private final game_service _game;
 
 
-   MyFrame2(Arena arena, int gameID, game_service game_service) {
+   MyFrame(Arena arena, int gameID, game_service game_service) {
       _ar = arena;
       _scenario = gameID;
       _game = game_service;
@@ -49,12 +47,12 @@ public class MyFrame2 extends JPanel implements ActionListener {
       updateFrame(_ar);
       drawGraph(g);
       drawPokemons(g);
-      drawAgants(g);
+      drawAgents(g);
       drawInfo(g);
       paintAgentValue(g);
       paintPic(g);
-      paintSenario(g);
-      paintTimeToEnd(g,time);
+      paintScenario(g);
+      paintTimeToEnd(g);
    }
 
    public void paint(Graphics g) {
@@ -100,23 +98,21 @@ public class MyFrame2 extends JPanel implements ActionListener {
             Point3D c = pokemon.getLocation();
             int r = 10;
             Image poc = new ImageIcon("data/poc1.png").getImage();
-
-          //  g.setColor(Color.green);
             if (pokemon.getType() < 0) {
                poc = new ImageIcon("data/poc2.png").getImage();
-               //    g.setColor(Color.orange);
             }
             if (c != null) {
                geo_location fp = this._w2f.world2frame(c);
-               g.drawImage(poc,(int) fp.x() - r, (int) fp.y() - r,4 * r, 4 * r,null);
-              // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
+               g.drawImage(poc, (int) fp.x() - r, (int) fp.y() - r, 4 * r, 4 * r, null);
+               // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 2 * r, 2 * r);
             }
          }
       }
    }
 
-   private void drawAgants(Graphics g) {
-      List<Agent> agents = _ar.getAgents();
+   private void drawAgents(Graphics g) {
+      List<Agent> agents = Arena.getAgents(_game.getAgents(), _ar.getAgents(), _ar.getGraph());
+//      List<Agent> agents = _ar.getAgents();
       g.setColor(Color.red);
       if (agents != null) {
          for (Agent agent : agents) {
@@ -124,27 +120,11 @@ public class MyFrame2 extends JPanel implements ActionListener {
             int r = 8;
             if (c != null) {
                geo_location fp = this._w2f.world2frame(c);
-               Image image = new ImageIcon("data/ash1.jpg").getImage();;
-               switch (agent.getID()%3) {
-                  case 0: {
-                     image = new ImageIcon("data/ash1.jpg").getImage();
-                     break;
-                  }
-                  case 1: {
-                     image = new ImageIcon("data/brokpoc.jpg").getImage();
-                     break;
-                  }
-                  case 2: {
-                     image = new ImageIcon("data/mistypoc.jpg").getImage();
-                     break;
-                  }
-               }
-
-               g.drawImage(image,(int) fp.x() - 2*r, (int) fp.y() - 2*r,4 * r, 4 * r,null);
-              // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 4 * r, 3 * r);
-
+               Image image = getAgentImage(agent.getID());
+               g.drawImage(image, (int) fp.x() - 2 * r, (int) fp.y() - 2 * r, 4 * r, 4 * r, null);
+               // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 4 * r, 3 * r);
                String str = String.format("agent %d", agent.getID());
-               g.drawString(str, (int) fp.x() , (int) fp.y() - r * 5);
+               g.drawString(str, (int) fp.x(), (int) fp.y() - r * 5);
             }
          }
       }
@@ -165,16 +145,6 @@ public class MyFrame2 extends JPanel implements ActionListener {
       geo_location dFrame = _w2f.world2frame(dest);
       g.drawLine((int) sFrame.x(), (int) sFrame.y(), (int) dFrame.x(), (int) dFrame.y());
    }
-public void startTimmer(long t){
-      time = t;
-      timer = new Timer(1,this);
-      timer.start();
-}
-
-   @Override
-   public void actionPerformed(ActionEvent e) {
-      paintTimeToEnd(this.getGraphics(),--time);
-   }
 
    private void paintAgentValue(Graphics g) {
       g.setColor(Color.gray.darker());
@@ -183,48 +153,48 @@ public void startTimmer(long t){
       g.setColor(Color.green.darker());
       g.setFont(new Font(null, Font.BOLD, 22));
       for (Agent agent : _ar.getAgents()) {
-         Image image = new ImageIcon("data/ash1.jpg").getImage();;
-
-         switch (agent.getID()%3) {
-            case 0: {
-               image = new ImageIcon("data/ash1.jpg").getImage();
-               break;
-            }
-            case 1: {
-               image = new ImageIcon("data/brokpoc.jpg").getImage();
-               break;
-            }
-            case 2: {
-               image = new ImageIcon("data/mistypoc.jpg").getImage();
-               break;
-            }
-         }
-         g.drawImage(image,this.getWidth() -330, 40 + 30 * agent.getID(),25, 25,null);
+         Image image = getAgentImage(agent.getID());
+         g.drawImage(image, this.getWidth() - 330, 40 + 30 * agent.getID(), 25, 25, null);
          String str = String.format("agent %d:  score: %.1f", agent.getID(), agent.getValue());
-         g.drawString(str, this.getWidth() -300, 58 + 30 * agent.getID());
+         g.drawString(str, this.getWidth() - 300, 58 + 30 * agent.getID());
       }
    }
 
+   private Image getAgentImage(int id) {
+      Image image = new ImageIcon("data/ash1.jpg").getImage();
+      switch (id % 3) {
+         case 0: {
+            image = new ImageIcon("data/ash1.jpg").getImage();
+            break;
+         }
+         case 1: {
+            image = new ImageIcon("data/brokpoc.jpg").getImage();
+            break;
+         }
+         case 2: {
+            image = new ImageIcon("data/mistypoc.jpg").getImage();
+            break;
+         }
+      }
+      return image;
+   }
 
-   private void paintSenario(Graphics g) {
+
+   private void paintScenario(Graphics g) {
       g.setColor(Color.black);
       g.setFont(new Font(null, Font.BOLD, 25));
       g.drawString("scenario " + _scenario, 40, 35);
    }
 
-   private void paintTimeToEnd(Graphics g,long t) {
+   private void paintTimeToEnd(Graphics g) {
       g.setColor(Color.GREEN.darker().darker());
       g.setFont(new Font(null, Font.BOLD, 22));
-    //  long timeToEnd = _game.timeToEnd();
-      g.drawString("Time to end: " + (float) t / 100, 40, 55);
+      g.drawString("Time to end: " + _game.timeToEnd() / 1000, 40, 55);
    }
 
-   private void paintPic(Graphics g){
-
-        Image image = new ImageIcon("data/catch.jpg").getImage();
-
-
-         g.drawImage(image,this.getWidth()/2 -225, 40 ,450, 200,null);
+   private void paintPic(Graphics g) {
+      Image image = new ImageIcon("data/catch.jpg").getImage();
+      g.drawImage(image, this.getWidth() / 2 - 150, 0, 290, 158, null);
    }
 
 }

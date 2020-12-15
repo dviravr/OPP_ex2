@@ -16,7 +16,7 @@ public class Ex2 implements Runnable {
    private static game_service game;
    private static directed_weighted_graph graph;
    private static dw_graph_algorithms ga;
-   private static int scenario = 11;
+   private static int scenario = 1;
    private static BigFrame _win;
 
    public static void main(String[] args) {
@@ -46,7 +46,6 @@ public class Ex2 implements Runnable {
       _win = new BigFrame(_ar, scenario, game);
 
       game.startGame();
-      long time = game.timeToEnd();
       for (Agent agent : _ar.getAgents()) {
          game.chooseNextEdge(agent.getID(), agent.getCurrPokemon().getEdge().getDest());
       }
@@ -70,7 +69,6 @@ public class Ex2 implements Runnable {
          }
       }
       System.out.println(game.toString());
-      System.out.println(time);
    }
 
 
