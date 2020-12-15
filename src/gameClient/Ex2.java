@@ -2,6 +2,8 @@ package gameClient;
 
 import Server.Game_Server_Ex2;
 import api.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,48 +15,59 @@ public class Ex2 implements Runnable {
 
    private static Arena _ar;
    private static long _id = 316095660;
-   private static game_service game;
-   private static directed_weighted_graph graph;
-   private static dw_graph_algorithms ga;
-   private static int scenario = 1;
-   private static BigFrame _win;
+   private static game_service _game;
+   private static directed_weighted_graph _graph;
+   private static dw_graph_algorithms _ga;
+   private static int _scenario = 0;
+   private static LoginFrame _login;
+   private static boolean _loginPage = false;
 
    public static void main(String[] args) {
-//      _id = Long.parseLong(args[0]);
-//      scenario = Integer.parseInt(args[1]);
-
-      Thread client = new Thread(new Ex2());
-      client.start();
+      if (args.length > 0) {
+//         if there are id and scenario from the args start the game
+         _id = Long.parseLong(args[0]);
+         _scenario = Integer.parseInt(args[1]);
+         Thread client = new Thread(new Ex2());
+         client.start();
+      } else {
+//         if there aren't id and scenario from the args start the game after login
+         _login = new LoginFrame();
+         _loginPage = true;
+      }
    }
 
    @Override
    public void run() {
-      game = Game_Server_Ex2.getServer(scenario); // you have [0,23] games
-      String g = game.getGraph();
-      graph = game.getJava_Graph_Not_to_be_used();
-      ga = new DWGraph_Algo(graph);
-      game.login(_id);  // please use your ID only as a key. uncomment this will upload your results to the server
+      if (_loginPage) {
+         _id = _login.getId();
+         _scenario = _login.getScenario();
+      }
+      _game = Game_Server_Ex2.getServer(_scenario); // you have [0,23] games
+      String g = _game.getGraph();
+      _graph = getGraph(g);
+      _ga = new DWGraph_Algo(_graph);
+      _game.login(_id);  // please use your ID only as a key. uncomment this will upload your results to the server
       _ar = new Arena();
-      _ar.setGraph(graph);
-      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), graph));
-      String info = game.toString();
+      _ar.setGraph(_graph);
+      _ar.setPokemons(Arena.json2Pokemons(_game.getPokemons(), _ar.getPokemons(), _graph));
+      String info = _game.toString();
       System.out.println(info);
       System.out.println(g);
-      System.out.println(game.getPokemons());
+      System.out.println(_game.getPokemons());
 
       locateAgents();
-      _win = new BigFrame(_ar, scenario, game);
+      GameFrame _win = new GameFrame(_ar, _scenario, _game);
 
-      game.startGame();
+      _game.startGame();
       for (Agent agent : _ar.getAgents()) {
-         game.chooseNextEdge(agent.getID(), agent.getCurrPokemon().getEdge().getDest());
+         _game.chooseNextEdge(agent.getID(), agent.getCurrPokemon().getEdge().getDest());
       }
       System.out.println(_ar.getAgents());
-      game.move();
-      while (game.isRunning()) {
-         long t = game.timeToEnd();
-         String lg = game.move();
-         _ar.setAgents(Arena.getAgents(lg, _ar.getAgents(), graph));
+      _game.move();
+      while (_game.isRunning()) {
+         long t = _game.timeToEnd();
+         String lg = _game.move();
+         _ar.setAgents(Arena.getAgents(lg, _ar.getAgents(), _graph));
          _win.update(_ar);
          System.out.println(lg);
          long tts = getMinTimeToSleep(_ar.getAgents());
@@ -65,24 +78,24 @@ public class Ex2 implements Runnable {
          }
          for (Agent agent : _ar.getAgents()) {
             int newDest = closestPokemon(agent);
-            game.chooseNextEdge(agent.getID(), newDest);
+            _game.chooseNextEdge(agent.getID(), newDest);
          }
       }
-      System.out.println(game.toString());
+      System.out.println(_game.toString());
    }
 
 
    private static int closestPokemon(Agent agent) {
-      _ar.setPokemons(Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), graph));
+      _ar.setPokemons(Arena.json2Pokemons(_game.getPokemons(), _ar.getPokemons(), _graph));
       ArrayList<Pokemon> pokemons = _ar.getPokemons();
 //      find best pokemon's src
       int pSrc = findBestPokemon(agent, pokemons);
       int dest = -1;
       if (pSrc != -1) {
 //         find the shortest path between agent's node and pokemon's src
-         List<node_data> path = ga.shortestPath(agent.getSrcNode(), pSrc);
+         List<node_data> path = _ga.shortestPath(agent.getSrcNode(), pSrc);
 //         adding the pokemon's dest to the path
-         path.add(graph.getNode(agent.getCurrPokemon().getEdge().getDest()));
+         path.add(_graph.getNode(agent.getCurrPokemon().getEdge().getDest()));
          do {
 //            taking the first element from the path while he isn't the agent's node and return that node
             dest = path.remove(0).getKey();
@@ -103,10 +116,10 @@ public class Ex2 implements Runnable {
          int pSrc = pokemon.getEdge().getSrc();
          double closestAgent = Double.MAX_VALUE;
          if (pokemon.getClosestAgent() != null) {
-            closestAgent = ga.shortestPathDist(pokemon.getClosestAgent().getSrcNode(), pSrc);
+            closestAgent = _ga.shortestPathDist(pokemon.getClosestAgent().getSrcNode(), pSrc);
          }
-         double newDist = ga.shortestPathDist(agent.getSrcNode(), pSrc);
-         double oldDist = ga.shortestPathDist(agent.getSrcNode(), agent.getCurrPokemon().getEdge().getSrc());
+         double newDist = _ga.shortestPathDist(agent.getSrcNode(), pSrc);
+         double oldDist = _ga.shortestPathDist(agent.getSrcNode(), agent.getCurrPokemon().getEdge().getSrc());
 //         check if the closest agent to the pokemon is closer the the current agent and if we should switch pokemon
          if (closestAgent >= newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
 //            set old closest agent's pokemon to null
@@ -122,7 +135,7 @@ public class Ex2 implements Runnable {
    }
 
    private static boolean shouldSwitchPokemon(double newDist, double oldDist, double newValue, Agent agent) {
-      long t = game.timeToEnd();
+      long t = _game.timeToEnd();
       double oldValue = agent.getCurrPokemon().getValue();
       if (newDist <= oldDist) {
          if (newValue >= oldValue) {
@@ -146,7 +159,7 @@ public class Ex2 implements Runnable {
       PriorityQueue<Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
       int numOfAgents = getNumOfAgent();
 
-      if (ga.isConnected()) {
+      if (_ga.isConnected()) {
          for (int i = 0; i < numOfAgents; i++) {
             int src = -1;
             Pokemon pokemon = mostValuesPokemons.poll();
@@ -154,7 +167,7 @@ public class Ex2 implements Runnable {
                src = pokemon.getEdge().getSrc();
             }
 //          locate the agent in the most value pokemon's src node
-            game.addAgent(src);
+            _game.addAgent(src);
          }
       } else {
          int i = 0;
@@ -166,18 +179,18 @@ public class Ex2 implements Runnable {
                src = pokemon.getEdge().getSrc();
             }
             for (int prev : prevSrc) {
-               if (ga.shortestPathDist(prev, src) == -1) {
+               if (_ga.shortestPathDist(prev, src) == -1) {
                   break;
                }
             }
             prevSrc.add(src);
 //            locate the agent in the most value pokemon's src node
-            game.addAgent(src);
+            _game.addAgent(src);
             i++;
          }
       }
 
-      ArrayList<Agent> agents = Arena.getAgents(game.getAgents(), new ArrayList<>(), graph);
+      ArrayList<Agent> agents = Arena.getAgents(_game.getAgents(), new ArrayList<>(), _graph);
       for (Agent agent : agents) {
          for (Pokemon pokemon : pokemons) {
             if (pokemon.getEdge().getSrc() == agent.getSrcNode()) {
@@ -200,7 +213,7 @@ public class Ex2 implements Runnable {
             src = pokemon.getEdge().getSrc();
          }
          for (int a : ans) {
-            if (ga.shortestPathDist(src, a) != -1) {
+            if (_ga.shortestPathDist(src, a) != -1) {
                diffComponent = false;
             }
          }
@@ -220,7 +233,7 @@ public class Ex2 implements Runnable {
    private static long getMinTimeToSleep(ArrayList<Agent> agents) {
       long minT = -1;
       long t = 100;
-      ArrayList<Pokemon> pokemons = Arena.json2Pokemons(game.getPokemons(), _ar.getPokemons(), graph);
+      ArrayList<Pokemon> pokemons = Arena.json2Pokemons(_game.getPokemons(), _ar.getPokemons(), _graph);
 //      calculate the time every agent need to sleep and retuning the minimum time
       for (Agent agent : agents) {
          if (agent.getCurrPokemon() != null) {
@@ -242,12 +255,20 @@ public class Ex2 implements Runnable {
       int numOfAgents = 0;
       try {
          JSONObject line;
-         line = new JSONObject(game.toString());
+         line = new JSONObject(_game.toString());
          JSONObject gameServer = line.getJSONObject("GameServer");
          numOfAgents = gameServer.getInt("agents");
       } catch (JSONException e) {
          e.printStackTrace();
       }
       return numOfAgents;
+   }
+
+   private static directed_weighted_graph getGraph(String g) {
+//      read graph from string
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphAdapter());
+      Gson gson = gsonBuilder.create();
+      return gson.fromJson(g, DWGraph_DS.class);
    }
 }
