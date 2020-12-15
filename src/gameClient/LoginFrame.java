@@ -15,7 +15,7 @@ public class LoginFrame extends JFrame {
     JTextField _scenarioTF = new JTextField(3);
 
     LoginFrame() {
-        this.setSize(500, 500);
+        this.setSize(600, 500);
         this.setLocationRelativeTo(null);
         this.setTitle("POKEMON - DAVID AND DVIR");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,6 +33,7 @@ public class LoginFrame extends JFrame {
         scenarioL.setFont(f);
 
         _startGame = new JButton("START GAME");
+        _startGame.setFont(f);
 
         idP.add(idL);
         idP.add(_idTF);

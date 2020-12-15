@@ -109,8 +109,7 @@ public class GamePanel extends JPanel {
    }
 
    private void drawAgents(Graphics g) {
-      List<Agent> agents = Arena.getAgents(_game.getAgents(), _ar.getAgents(), _ar.getGraph());
-//      List<Agent> agents = _ar.getAgents();
+      List<Agent> agents = _ar.getAgents();
       g.setColor(Color.red);
       if (agents != null) {
          for (Agent agent : agents) {
@@ -122,7 +121,7 @@ public class GamePanel extends JPanel {
                g.drawImage(image, (int) fp.x() - 2 * r, (int) fp.y() - 2 * r, 4 * r, 4 * r, null);
                // g.fillOval((int) fp.x() - r, (int) fp.y() - r, 4 * r, 3 * r);
                String str = String.format("agent %d", agent.getID());
-               g.drawString(str, (int) fp.x(), (int) fp.y() - r * 5);
+               g.drawString(str, (int) fp.x() - r * 2, (int) fp.y() - r * 5);
             }
          }
       }
