@@ -75,6 +75,8 @@ class DWGraph_DSTest {
       assertEquals(wg.edgeSize(), 1);
       wg.connect(0, 2, 0.5);
       assertEquals(wg.edgeSize(), 2);
+      wg.connect(0, 2, 1);
+      assertEquals(wg.edgeSize(), 2);
       wg.connect(2, 0, 3.5);
       assertEquals(wg.edgeSize(), 3);
    }
