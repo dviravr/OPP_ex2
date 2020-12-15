@@ -194,7 +194,6 @@ public class MyFrame extends JPanel {
 
    private void paintPic(Graphics g) {
       Image image = new ImageIcon("data/catch.jpg").getImage();
-      g.drawImage(image, this.getWidth() / 2 - 150, 0, 290, 158, null);
+      g.drawImage(image, (this.getWidth() / 2) - 145, 0, 290, 158, null);
    }
-
 }

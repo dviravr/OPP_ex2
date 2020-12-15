@@ -16,19 +16,28 @@ public class Ex2 implements Runnable {
    private static game_service game;
    private static directed_weighted_graph graph;
    private static dw_graph_algorithms ga;
-   private static int scenario = 1;
-   private static BigFrame _win;
+   private static int scenario = 0;
+   private static LoginFrame login;
+   private static boolean loginPage = false;
 
    public static void main(String[] args) {
-//      _id = Long.parseLong(args[0]);
-//      scenario = Integer.parseInt(args[1]);
-
-      Thread client = new Thread(new Ex2());
-      client.start();
+      if (args.length > 0) {
+         _id = Long.parseLong(args[0]);
+         scenario = Integer.parseInt(args[1]);
+         Thread client = new Thread(new Ex2());
+         client.start();
+      } else {
+         login = new LoginFrame();
+         loginPage = true;
+      }
    }
 
    @Override
    public void run() {
+      if (loginPage) {
+         _id = login.getId();
+         scenario = login.getScenario();
+      }
       game = Game_Server_Ex2.getServer(scenario); // you have [0,23] games
       String g = game.getGraph();
       graph = game.getJava_Graph_Not_to_be_used();
@@ -43,7 +52,7 @@ public class Ex2 implements Runnable {
       System.out.println(game.getPokemons());
 
       locateAgents();
-      _win = new BigFrame(_ar, scenario, game);
+      BigFrame _win = new BigFrame(_ar, scenario, game);
 
       game.startGame();
       for (Agent agent : _ar.getAgents()) {

@@ -1,5 +1,3 @@
-package tests;
-
 import api.*;
 import org.junit.jupiter.api.Test;
 
