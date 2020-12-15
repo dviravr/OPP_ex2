@@ -52,7 +52,7 @@ public class Ex2 implements Runnable {
       System.out.println(game.getPokemons());
 
       locateAgents();
-      BigFrame _win = new BigFrame(_ar, scenario, game);
+      GameFrame _win = new GameFrame(_ar, scenario, game);
 
       game.startGame();
       for (Agent agent : _ar.getAgents()) {

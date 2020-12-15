@@ -7,18 +7,16 @@ import gameClient.util.Range2D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
-public class MyFrame extends JPanel {
+public class GamePanel extends JPanel {
    private Arena _ar;
    private gameClient.util.Range2Range _w2f;
    private final int _scenario;
    private final game_service _game;
 
 
-   MyFrame(Arena arena, int gameID, game_service game_service) {
+   GamePanel(Arena arena, int gameID, game_service game_service) {
       _ar = arena;
       _scenario = gameID;
       _game = game_service;

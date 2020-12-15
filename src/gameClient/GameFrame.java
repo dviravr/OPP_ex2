@@ -7,12 +7,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class BigFrame extends JFrame implements ActionListener, Runnable {
-   private final MyFrame panel;
+public class GameFrame extends JFrame implements ActionListener, Runnable {
+   private final GamePanel panel;
    private Arena _ar;
    private final game_service _game;
 
-   BigFrame(Arena arena, int gameID, game_service game_service) {
+   GameFrame(Arena arena, int gameID, game_service game_service) {
       _ar = arena;
       _game = game_service;
       this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,7 +22,7 @@ public class BigFrame extends JFrame implements ActionListener, Runnable {
       this.setTitle("POKEMON - DAVID AND DVIR");
       this.setLocation(20, 20);
 
-      panel = new MyFrame(arena, gameID, _game);
+      panel = new GamePanel(arena, gameID, _game);
       panel.setBounds(0, 150, this.getWidth(), getHeight() - 150);
       this.add(panel);
       this.setVisible(true);
