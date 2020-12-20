@@ -62,9 +62,6 @@ public class LoginFrame extends JFrame {
                 try {
                     _id = Long.parseLong(_idTF.getText());
                     _scenario = Integer.parseInt(_scenarioTF.getText());
-                    if (_scenario < 0) {
-                        throw new NumberFormatException();
-                    }
                     startGame();
                 } catch (NumberFormatException err) {
                     JOptionPane.showMessageDialog(null, "Invalid input!");
