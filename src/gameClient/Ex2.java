@@ -121,7 +121,7 @@ public class Ex2 implements Runnable {
          double newDist = _ga.shortestPathDist(agent.getSrcNode(), pSrc);
          double oldDist = _ga.shortestPathDist(agent.getSrcNode(), agent.getCurrPokemon().getEdge().getSrc());
 //         check if the closest agent to the pokemon is closer the the current agent and if we should switch pokemon
-         if (closestAgent >= newDist && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
+         if (closestAgent >= newDist && newDist != -1 && shouldSwitchPokemon(newDist, oldDist, pokemon.getValue(), agent)) {
 //            set old closest agent's pokemon to null
             if (pokemon.getClosestAgent() != null) {
                pokemon.getClosestAgent().setCurrPokemon(null);
@@ -159,37 +159,15 @@ public class Ex2 implements Runnable {
       PriorityQueue<Pokemon> mostValuesPokemons = new PriorityQueue<>(pokemons);
       int numOfAgents = getNumOfAgent();
 
-      if (_ga.isConnected()) {
-         for (int i = 0; i < numOfAgents; i++) {
-            int src = -1;
-            Pokemon pokemon = mostValuesPokemons.poll();
-            if (pokemon != null) {
-               src = pokemon.getEdge().getSrc();
-            }
+      for (int i = 0; i < numOfAgents; i++) {
+         int src = -1;
+         Pokemon pokemon = mostValuesPokemons.poll();
+         if (pokemon != null) {
+            src = pokemon.getEdge().getSrc();
+         }
 //          locate the agent in the most value pokemon's src node
-            _game.addAgent(src);
-         }
-      } else {
-         int i = 0;
-         ArrayList<Integer> prevSrc = findDifferentComponents(numOfAgents, mostValuesPokemons);
-         while (i < numOfAgents && !mostValuesPokemons.isEmpty()) {
-            int src = -1;
-            Pokemon pokemon = mostValuesPokemons.poll();
-            if (pokemon != null) {
-               src = pokemon.getEdge().getSrc();
-            }
-            for (int prev : prevSrc) {
-               if (_ga.shortestPathDist(prev, src) == -1) {
-                  break;
-               }
-            }
-            prevSrc.add(src);
-//            locate the agent in the most value pokemon's src node
-            _game.addAgent(src);
-            i++;
-         }
+         _game.addAgent(src);
       }
-
       ArrayList<Agent> agents = Arena.getAgents(_game.getAgents(), new ArrayList<>(), _graph);
       for (Agent agent : agents) {
          for (Pokemon pokemon : pokemons) {
@@ -201,28 +179,6 @@ public class Ex2 implements Runnable {
          }
       }
       _ar.setAgents(agents);
-   }
-
-   private static ArrayList<Integer> findDifferentComponents(int numOfAgents, PriorityQueue<Pokemon> mostValuesPokemons) {
-      ArrayList<Integer> ans = new ArrayList<>();
-      int i = 0, src = -1;
-      boolean diffComponent = true;
-      while (i < numOfAgents && !mostValuesPokemons.isEmpty()) {
-         Pokemon pokemon = mostValuesPokemons.poll();
-         if (pokemon != null) {
-            src = pokemon.getEdge().getSrc();
-         }
-         for (int a : ans) {
-            if (_ga.shortestPathDist(src, a) != -1) {
-               diffComponent = false;
-            }
-         }
-         if (diffComponent) {
-            ans.add(src);
-            i++;
-         }
-      }
-      return ans;
    }
 
    private static boolean atePokemon(Agent agent, ArrayList<Pokemon> pokemons) {
@@ -244,6 +200,7 @@ public class Ex2 implements Runnable {
             }
          }
          if (minT == -1 || t < minT) {
+//            don't sleep more then 90 ms
             minT = Math.max(t, 90);
          }
       }
