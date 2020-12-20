@@ -81,6 +81,7 @@ public class Ex2 implements Runnable {
             _game.chooseNextEdge(agent.getID(), newDest);
          }
       }
+      new EndGameFrame(_win, _ar, _scenario, _id);
       System.out.println(_game.toString());
    }
 
