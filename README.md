@@ -84,8 +84,10 @@ by using `removeEdge()`.
 * First you need to clone the project to your computer: `git clone https://github.com/dviravr/OPP_ex2.git`.
 
 * Now you can choose to run it from the main or the jar file.
- to run it from the jar file you need to open your CMD in the directory, and run the command: `java -jar Ex2.jar`
+ to run it from the jar file you need to open your CMD in the directory, and run the command: `java -jar Ex2.jar` 
+
+
+  you can add an scenerio and id as param to the command like this: `java -jar Ex2.jar 123456789 12`
  
- you can add an scenerio and id as param to the command like this: `java -jar Ex2.jar 123456789 12`
  
  * The program require jdk 13 and up.
