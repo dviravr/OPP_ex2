@@ -79,6 +79,9 @@ by using `removeEdge()`.
 
 * WGraph_DS format: { "Edges: [edge, edge, edge]", "Nodes": [node, node, node] }
 
+## The Pokemon Game
+Using the graph we realize a Pokemon game full details in wiki tab.
+
 ## How to run the program
 
 * First you need to clone the project to your computer: `git clone https://github.com/dviravr/OPP_ex2.git`.
