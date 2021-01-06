@@ -15,6 +15,8 @@ public class NodeData implements node_data {
 
    public NodeData(int id) {
       _id = id;
+      _tag = -1;
+      _info = "not visited";
    }
 
    public NodeData(int id, GeoLocation p) {

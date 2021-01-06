@@ -275,7 +275,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
    private directed_weighted_graph reverseGraph(directed_weighted_graph g) {
       directed_weighted_graph ans = new DWGraph_DS();
       for (node_data i : g.getV()) {
-         ans.addNode(i);
+         ans.addNode(new NodeData(i.getKey()));
       }
       for (node_data j : g.getV()) {
          for (edge_data i : g.getE(j.getKey())) {
@@ -385,6 +385,58 @@ public class DWGraph_Algo implements dw_graph_algorithms {
       } catch (IOException e) {
          e.printStackTrace();
          return false;
+      }
+   }
+
+   public ArrayList<Integer> connectedComponent(int src) {
+      resetVisited();
+      Set<Integer> path = dfs(getGraph(), src, new HashSet<>());
+      Set<Integer> transposePath = dfs(reverseGraph(getGraph()), src, new HashSet<>());
+      ArrayList<Integer> component = new ArrayList<>();
+      for (Integer n : path) {
+         if (transposePath.contains(n)) {
+            getGraph().getNode(n).setTag(n);
+            component.add(n);
+         }
+      }
+      return component;
+   }
+
+   public ArrayList<ArrayList<Integer>> connectedComponents() {
+      resetValues();
+      ArrayList<ArrayList<Integer>> components = new ArrayList<>();
+      for (node_data n : getGraph().getV()) {
+         if (n.getTag() == -1) {
+            components.add(connectedComponent(n.getKey()));
+         }
+      }
+      return components;
+   }
+
+   private Set<Integer> dfs(directed_weighted_graph g, int key, Set<Integer> scc) {
+      node_data n = g.getNode(key);
+      n.setInfo("visited");
+      scc.add(key);
+
+      for (edge_data e : g.getE(key)) {
+         node_data ni = g.getNode(e.getDest());
+         if (ni.getInfo().equals("not visited")) {
+            dfs(g, ni.getKey(), scc);
+         }
+      }
+      return scc;
+   }
+
+   private void resetValues() {
+      for (node_data n : _graph.getV()) {
+         n.setInfo("not visited");
+         n.setTag(-1);
+      }
+   }
+
+   private void resetVisited() {
+      for (node_data n : _graph.getV()) {
+         n.setInfo("not visited");
       }
    }
 }

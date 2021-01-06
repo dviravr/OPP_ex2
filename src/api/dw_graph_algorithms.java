@@ -1,4 +1,5 @@
 package api;
+import java.util.ArrayList;
 import java.util.List;
 /**
  * This interface represents a Directed (positive) Weighted Graph Theory Algorithms including:
@@ -84,4 +85,8 @@ public interface dw_graph_algorithms {
     * @return true - iff the graph was successfully loaded.
     */
    public boolean load(String file);
+
+   public ArrayList<Integer> connectedComponent(int src);
+
+   public ArrayList<ArrayList<Integer>> connectedComponents();
 }
