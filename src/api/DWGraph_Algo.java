@@ -390,12 +390,12 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
    public ArrayList<Integer> connectedComponent(int src) {
       resetVisited();
-      Set<Integer> path = dfs(getGraph(), src, new HashSet<>());
-      Set<Integer> transposePath = dfs(reverseGraph(getGraph()), src, new HashSet<>());
+      Set<Integer> path = bfs(getGraph(), src);
+      Set<Integer> transposePath = bfs(reverseGraph(getGraph()), src);
       ArrayList<Integer> component = new ArrayList<>();
       for (Integer n : path) {
          if (transposePath.contains(n)) {
-            getGraph().getNode(n).setTag(n);
+            getGraph().getNode(n).setTag(src);
             component.add(n);
          }
       }
@@ -422,6 +422,27 @@ public class DWGraph_Algo implements dw_graph_algorithms {
          node_data ni = g.getNode(e.getDest());
          if (ni.getInfo().equals("not visited")) {
             dfs(g, ni.getKey(), scc);
+         }
+      }
+      return scc;
+   }
+
+   private Set<Integer> bfs(directed_weighted_graph g, int src) {
+      Queue<Integer> q = new LinkedList<>();
+      q.add(src);
+      Set<Integer> scc = new HashSet<>();
+      g.getNode(src).setInfo("visited");
+      scc.add(src);
+
+      while (!q.isEmpty()) {
+         int node = q.remove();
+         for (edge_data e : g.getE(node)) {
+            node_data ni = g.getNode(e.getDest());
+            if (!ni.getInfo().equals("visited")) {
+               q.add(ni.getKey());
+               ni.setInfo("visited");
+               scc.add(ni.getKey());
+            }
          }
       }
       return scc;

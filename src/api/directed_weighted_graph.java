@@ -1,6 +1,7 @@
 package api;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * This interface represents a directional weighted graph.
@@ -55,6 +56,8 @@ public interface directed_weighted_graph {
     * @return Collection<node_data>
     */
    public Collection<node_data> getV();
+
+   public HashMap<Integer, node_data> getGraphNodes();
 
    /**
     * This method returns a pointer (shallow copy) for the

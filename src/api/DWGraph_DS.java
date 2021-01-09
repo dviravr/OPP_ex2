@@ -76,6 +76,10 @@ public class DWGraph_DS implements directed_weighted_graph {
       return _graphNodes.values();
    }
 
+   public HashMap<Integer, node_data> getGraphNodes() {
+      return _graphNodes;
+   }
+
    @Override
    public Collection<edge_data> getE(int node_id) {
       if (hasNode(node_id)) {

@@ -80,12 +80,17 @@ public class NodeData implements node_data {
       _tag = t;
    }
 
+//   @Override
+//   public String toString() {
+//      return "{" +
+//              "id=" + _id +
+//              ", pos=" + _pos +
+//              '}';
+//   }
+
    @Override
    public String toString() {
-      return "{" +
-              "id=" + _id +
-              ", pos=" + _pos +
-              '}';
+      return String.valueOf(_id);
    }
 
    @Override
@@ -120,10 +125,13 @@ class NodeDataAdapter implements JsonSerializer<node_data>, JsonDeserializer<nod
    public node_data deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 //      read node from a json
       int id = jsonElement.getAsJsonObject().get("id").getAsInt();
-      String pos = jsonElement.getAsJsonObject().get("pos").getAsString();
-      String[] location = pos.split(",");
-      GeoLocation p = new GeoLocation(Double.parseDouble(location[0]),
-              Double.parseDouble(location[1]), Double.parseDouble(location[2]));
+      GeoLocation p = null;
+      if (jsonElement.getAsJsonObject().get("pos") != null) {
+         String pos = jsonElement.getAsJsonObject().get("pos").getAsString();
+         String[] location = pos.split(",");
+         p = new GeoLocation(Double.parseDouble(location[0]),
+                 Double.parseDouble(location[1]), Double.parseDouble(location[2]));
+      }
       return new NodeData(id, p);
    }
 }
